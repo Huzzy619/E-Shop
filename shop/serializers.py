@@ -57,11 +57,10 @@ class ProductSerializer(serializers.ModelSerializer):
             "unit_price",
             "collection",
             "images",
-            "rating", 
-            "total_review", 
+            "rating",
+            "total_review",
             "colors",
             "sizes",
-
         ]
         depth = 1
 
@@ -222,8 +221,25 @@ class CreateOrderSerializer(serializers.Serializer):
             ]
             OrderItem.objects.bulk_create(order_items)
 
-            Cart.objects.filter(pk=cart_id).delete()
+            # Reduce the quantities been ordered from the inventory
+            for item in cart_items:
+                item.product.inventory -= item.quantity
 
+                if item.product.inventory < 0:
+                    raise serializers.ValidationError(
+                        {
+                            "error": "There is not enough product to complete the order",
+                            "status": False,
+                            "detail": {
+                                "id": item.product.id,
+                                "product": item.product.title,
+                            },
+                        }
+                    )
+
+                item.product.save()
+
+            Cart.objects.filter(pk=cart_id).delete()
             order_created.send_robust(self.__class__, instance=order)
 
             return order
