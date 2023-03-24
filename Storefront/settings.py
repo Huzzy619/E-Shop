@@ -80,10 +80,13 @@ INTERNAL_IPS = [
 
 # ? Documentation Settings
 SPECTACULAR_SETTINGS = {
-    "TITLE": "E-shop API",
-    "DESCRIPTION": "E-commerce",
+    "TITLE": "E-Shop API",
+    "DESCRIPTION": "Backend for an E-Commerce",
     "VERSION": "1.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    'DISABLE_ERRORS_AND_WARNINGS': True,
+    'SCHEMA_COERCE_PATH_PK_SUFFIX': True,
+    'SCHEMA_PATH_PREFIX_TRIM': True,
 }
 
 AUTH_USER_MODEL = "core.User"

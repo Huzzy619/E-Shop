@@ -1,17 +1,23 @@
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from rest_framework import serializers
+
+from likes.models import Like
 from likes.serializers import LikeSerializer
-from django.utils.timezone import datetime
+from shop.signals import order_created
+
 from .models import (
-    Collection,  Cart, CartItem, Order, OrderItem,
+    BillingAddress,
+    Cart,
+    CartItem,
+    Collection,
+    Order,
+    OrderItem,
     Product,
     ProductImage,
     Review,
-    BillingAddress, TrackOrder
-
+    TrackOrder,
 )
-from shop.signals import order_created
-from django.db import transaction
 
 Customer = get_user_model()
 
@@ -24,25 +30,18 @@ class CollectionSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "products_count"]
 
 
-
 class ProductImageSerializer(serializers.ModelSerializer):
-    property = serializers.SerializerMethodField()
+    # property = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductImage
-        fields = ["id", "image", 'property']
+        fields = ["id", "image"]
 
-    # def create(self, validated_data):
-    #     product_id = self.context["product_id"]
-    #     return ProductImage.objects.create(product_id=product_id, **validated_data)
-
-    #TODO
+    # TODO
     def get_property(self, image):
-
         properties = image.property.all()
-        
-        return [item.__str__() for item in properties]
 
+        return [item.__str__() for item in properties]
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -58,10 +57,23 @@ class ProductSerializer(serializers.ModelSerializer):
             "unit_price",
             "collection",
             "images",
+            "rating", 
+            "total_review", 
+            "colors",
+            "sizes",
+
         ]
+        depth = 1
+
 
 class LikeProductSerializer(LikeSerializer):
+    product_id = serializers.IntegerField(source="object_id")
     model = Product
+
+    class Meta:
+        model = Like
+        fields = ["id", "product_id"]
+
 
 class CreateReviewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -71,6 +83,7 @@ class CreateReviewSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         product_id = self.context["product_id"]
         return Review.objects.create(product_id=product_id, **validated_data)
+
 
 class ReviewSerializer(serializers.Serializer):
     total_reviews = serializers.IntegerField()
@@ -209,26 +222,26 @@ class CreateOrderSerializer(serializers.Serializer):
             ]
             OrderItem.objects.bulk_create(order_items)
 
-            # Cart.objects.filter(pk=cart_id).delete()
+            Cart.objects.filter(pk=cart_id).delete()
 
             order_created.send_robust(self.__class__, instance=order)
 
             return order
 
+
 class TrackOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = TrackOrder
-        exclude = ['id', 'order']
+        exclude = ["id", "order"]
+
 
 class UpdateTrackOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = TrackOrder
-        fields = ['status']
-        
-        
+        fields = ["status"]
+
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = BillingAddress
-        fields = ['id','name', 'address']
-
+        fields = ["id", "name", "address"]

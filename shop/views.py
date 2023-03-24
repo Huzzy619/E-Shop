@@ -94,7 +94,6 @@ class LikeProductView(LikeView):
 
 
 class ReviewViewSet(GenericViewSet):
-
     def get_queryset(self):
         return Review.objects.filter(product_id=self.kwargs["product_pk"])
 
@@ -118,7 +117,11 @@ class ReviewViewSet(GenericViewSet):
         product_reviews = self.get_queryset()
         total_reviews = product_reviews.count()
         sum_of_ratings = sum([item.ratings for item in product_reviews])
-        rating = float(sum_of_ratings / total_reviews)
+
+        try:
+            rating = float(sum_of_ratings / total_reviews)
+        except ZeroDivisionError:
+            rating = 1.0
 
         return Response(
             {"total_reviews": total_reviews, "rating": rating, "status": True},

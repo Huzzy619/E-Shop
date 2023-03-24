@@ -41,9 +41,16 @@ class Profile(models.Model):
 
 class UserSettings(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    pass
-
+    notification = models.BooleanField(default=True)
+    sound = models.BooleanField(default=True)
+    vibrate = models.BooleanField(default=True)
+    special_offers = models.BooleanField(default=True)
+    payments = models.BooleanField(default=True)
+    cashback = models.BooleanField(default=True)
+    app_updates = models.BooleanField(default=True)
+    language = models.CharField(max_length=50, default='english')
+    face_id = models.BooleanField(default=False)
+    biometric = models.BooleanField(default=False)
 
 class OTP(models.Model):
     counter = models.IntegerField(default=1)

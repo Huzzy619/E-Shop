@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 from rest_framework import serializers
 
-from .models import Profile
+from .models import Profile, UserSettings
 from .utils import Google, register_social_user
 
 
@@ -85,3 +85,9 @@ class GoogleSocialAuthSerializer(serializers.Serializer):
         name = user_data["name"]
 
         return register_social_user(email=email, name=name)
+
+
+class UserSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserSettings
+        exclude = ['id', 'user']

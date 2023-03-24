@@ -11,21 +11,19 @@ from likes.models import Like
 from shop.validators import validate_file_size
 
 
-# TODO
-class Property(models.Model):
+class Color(models.Model):
     color = models.CharField(max_length=30, null=True, blank=True)
-    size = models.IntegerField(null=True, blank=True)
-
-    class Meta:
-        verbose_name_plural = "Properties"
 
     def __str__(self) -> str:
-        if self.color and self.size:
-            return f"{self.color - self.size}"
-        elif self.color:
-            return self.color
-        else:
-            return str(self.size)
+        return self.color
+
+class Size(models.Model):
+    size = models.IntegerField(null=True, blank=True)
+
+    def __str__(self) -> str:
+        return str(self.size)
+
+    
 
 
 class Collection(models.Model):
@@ -54,11 +52,30 @@ class Product(models.Model):
         Collection, on_delete=models.PROTECT, related_name="products"
     )
     likes = GenericRelation(Like)
-    property = models.ManyToManyField(Property)
+    colors = models.ManyToManyField(Color, blank=True)
+    sizes = models.ManyToManyField(Size, blank=True)
 
     def __str__(self) -> str:
         return self.title
 
+    @property
+    def rating(self):
+        total_reviews = self.reviews.count()
+        sum_of_ratings = sum([item.ratings for item in self.reviews.all()])
+        
+        try:
+            rating = float(sum_of_ratings / total_reviews)
+        except ZeroDivisionError:
+            rating = 1.0
+
+        return rating  
+    @property
+    def total_review(self):
+        total = self.reviews.count()
+        if total < 1:
+            return 1
+        return total  
+        
     class Meta:
         ordering = ["title"]
 
@@ -68,13 +85,14 @@ class ProductImage(models.Model):
         Product, on_delete=models.CASCADE, related_name="images"
     )
     image = models.ImageField(upload_to="store/images", validators=[validate_file_size])
-    property = models.ManyToManyField(Property)
+    colors = models.ManyToManyField(Color, blank=True)
+    sizes = models.ManyToManyField(Size, blank=True)
 
 
 class Order(models.Model):
-    PAYMENT_STATUS_PENDING = "P"
-    PAYMENT_STATUS_COMPLETE = "C"
-    PAYMENT_STATUS_FAILED = "F"
+    PAYMENT_STATUS_PENDING = "pending"
+    PAYMENT_STATUS_COMPLETE = "complete"
+    PAYMENT_STATUS_FAILED = "failed"
     PAYMENT_STATUS_CHOICES = [
         (PAYMENT_STATUS_PENDING, "Pending"),
         (PAYMENT_STATUS_COMPLETE, "Complete"),
@@ -83,7 +101,7 @@ class Order(models.Model):
     id = models.CharField(primary_key=True, max_length=10)
     placed_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(
-        max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING
+        max_length=10, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING
     )
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
 

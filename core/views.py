@@ -15,7 +15,7 @@ from rest_framework_simplejwt.serializers import (
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from .models import Profile
+from .models import Profile, UserSettings
 from .otp import OTPGenerator
 from .serializers import (
     ChangePasswordSerializer,
@@ -24,6 +24,7 @@ from .serializers import (
     OTPSerializer,
     ProfileSerializer,
     RegisterSerializer,
+    UserSettingsSerializer,
 )
 
 
@@ -40,10 +41,19 @@ class ProfileView(GenericAPIView):
         return Response(data, status=status.HTTP_200_OK)
 
     def patch(self, request):
-        profile = Profile.objects.get(user=request.user)
+        user = request.user
+        profile = Profile.objects.get(user=user)
         serializer = self.serializer_class(profile, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        if full_name := serializer.validated_data.get("full_name", ""):
+            name_split = full_name.split(" ")
+            if len(name_split) >= 2:
+                user.first_name = name_split[0]
+                user.last_name = name_split[1]
+                user.save()
+
         data = serializer.data
         data["status"] = True
         return Response(data, status=status.HTTP_200_OK)
@@ -58,7 +68,7 @@ class RegisterView(GenericAPIView):
         serializer.save()
 
         return Response(
-            {   
+            {
                 "status": True,
                 "detail": "Registered successfully. Check email for OTP",
             },
@@ -91,12 +101,13 @@ class LoginView(TokenObtainPairView):
 
         if not user:
             return Response(
-                {"error": "Invalid credentials", "status":False}, status=status.HTTP_401_UNAUTHORIZED
+                {"error": "Invalid credentials", "status": False},
+                status=status.HTTP_401_UNAUTHORIZED,
             )
 
         if not user.is_active:
             return Response(
-                {"error": "Account is not active, contact the admin", "status":False},
+                {"error": "Account is not active, contact the admin", "status": False},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
@@ -104,7 +115,7 @@ class LoginView(TokenObtainPairView):
         tokens = super().post(request)
         return Response(
             {
-                "status":True,
+                "status": True,
                 "detail": "Logged in successfully",
                 "tokens": tokens.data,
                 "user": {
@@ -125,7 +136,9 @@ class RefreshView(TokenRefreshView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         access_token = serializer.validated_data["access"]
-        return Response({"access": access_token, "status":True}, status=status.HTTP_200_OK)
+        return Response(
+            {"access": access_token, "status": True}, status=status.HTTP_200_OK
+        )
 
 
 class GetOTPView(GenericAPIView):
@@ -139,7 +152,7 @@ class GetOTPView(GenericAPIView):
 
         # * call function to send otp with email or SMS
 
-        return Response({"code": otp, "status":True}, status=status.HTTP_200_OK)
+        return Response({"code": otp, "status": True}, status=status.HTTP_200_OK)
 
 
 class VerifyOTPView(GenericAPIView):
@@ -162,7 +175,7 @@ class VerifyOTPView(GenericAPIView):
             user.save()
 
             return Response(
-                {"detail": "2FA successfully completed", "status":True},
+                {"detail": "2FA successfully completed", "status": True},
                 status=status.HTTP_202_ACCEPTED,
             )
 
@@ -182,12 +195,15 @@ class ChangePasswordView(GenericAPIView):
         try:
             password_validation.validate_password(password, request.user)
         except Exception as e:
-            return Response({"error": e, "status":False}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"error": e, "status": False}, status=status.HTTP_403_FORBIDDEN
+            )
 
         request.user.set_password(password)
         request.user.save()
         return Response(
-            {"detail": "Password updated successfully", "status":True}, status=status.HTTP_200_OK
+            {"detail": "Password updated successfully", "status": True},
+            status=status.HTTP_200_OK,
         )
 
 
@@ -205,5 +221,24 @@ class GoogleSocialAuthView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        data['status']: True
+        data["status"]: True
         return Response(data, status=status.HTTP_200_OK)
+
+
+class UserSettingsView(GenericAPIView):
+    serializer_class = UserSettingsSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return UserSettings.objects.filter(user=self.request.user)
+
+    def get(self, request):
+        instance = self.get_queryset().first()
+        serializer = self.serializer_class(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        instance = self.get_queryset().first()
+        serializer = self.serializer_class(instance, request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
