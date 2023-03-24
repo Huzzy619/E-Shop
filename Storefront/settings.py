@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     #?
 
     "core", 
-    # "shop", 
+    "shop", 
+    "likes",
     # "playground",
 ]
 

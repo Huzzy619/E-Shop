@@ -130,6 +130,7 @@ dmypy.json
 
 
 .vscode
-shop/
+# shop/
 playground/
 general.log
+media/store/

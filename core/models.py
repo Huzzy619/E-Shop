@@ -15,7 +15,10 @@ class User(AbstractUser):
     is_verified = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        return self.profile.full_name
+        full_name = self.profile.full_name
+        if not full_name:
+            return self.username
+        return full_name
 
 
 class Profile(models.Model):

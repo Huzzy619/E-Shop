@@ -22,8 +22,9 @@ class RegisterSerializer(serializers.Serializer):
     def validate(self, attrs):
         if not attrs["password1"] == attrs["password2"]:
             raise serializers.ValidationError(
-                detail={"error": "passwords do not match"}
+                detail={"error": "The two password fields didn’t match.", "status":False}
             )
+        
 
         return super().validate(attrs)
 
@@ -35,7 +36,7 @@ class RegisterSerializer(serializers.Serializer):
             )
         except IntegrityError:
             raise serializers.ValidationError(
-                detail={"error": "User with provided credentials already exists"}
+                detail={"error": "User with provided credentials already exists", "status":False}
             )
 
         return user
@@ -50,6 +51,18 @@ class OTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=6)
 
+class ChangePasswordSerializer(serializers.Serializer):
+    password1 = serializers.CharField()
+    password2 = serializers.CharField()
+
+    def validate(self, attrs):
+        if not attrs["password1"] == attrs["password2"]:
+            raise serializers.ValidationError(
+                detail={"error": "The two password fields didn’t match.", "status":False}
+            )
+            
+
+        return super().validate(attrs)
 
 class GoogleSocialAuthSerializer(serializers.Serializer):
     auth_token = serializers.CharField()
@@ -61,7 +74,7 @@ class GoogleSocialAuthSerializer(serializers.Serializer):
         try:
             user_data["sub"]
         except Exception as identifier:
-            raise serializers.ValidationError({"error": str(identifier)})
+            raise serializers.ValidationError({"error": str(identifier), "status":False})
 
         if user_data["aud"] != config("GOOGLE_CLIENT_ID"):
             raise serializers.ValidationError(
