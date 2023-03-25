@@ -17,6 +17,7 @@ class Color(models.Model):
     def __str__(self) -> str:
         return self.color
 
+
 class Size(models.Model):
     size = models.IntegerField(null=True, blank=True)
 
@@ -24,8 +25,6 @@ class Size(models.Model):
         return str(self.size)
 
     
-
-
 class Collection(models.Model):
     title = models.CharField(max_length=255)
     featured_product = models.ForeignKey(
@@ -69,6 +68,7 @@ class Product(models.Model):
             rating = 1.0
 
         return rating  
+    
     @property
     def total_review(self):
         total = self.reviews.count()
@@ -122,6 +122,7 @@ class Order(models.Model):
 
     class Meta:
         permissions = [("cancel_order", "Can cancel order")]
+
 
 class TrackOrder(models.Model):
     ORDER_STATUS = [
