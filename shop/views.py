@@ -122,6 +122,7 @@ class ReviewViewSet(GenericViewSet):
             rating = float(sum_of_ratings / total_reviews)
         except ZeroDivisionError:
             rating = 1.0
+            total_reviews = 1
 
         return Response(
             {"total_reviews": total_reviews, "rating": rating, "status": True},
@@ -156,12 +157,7 @@ class CartItemViewSet(ModelViewSet):
 
 
 class OrderViewSet(ModelViewSet):
-    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
-
-    def get_permissions(self):
-        if self.request.method in ["PATCH", "DELETE"]:
-            return [IsAdminUser()]
-        return [IsAuthenticated()]
+    http_method_names = ["get", "post", "head", "options"]
 
     def create(self, request, *args, **kwargs):
         serializer = shop_serializer.CreateOrderSerializer(

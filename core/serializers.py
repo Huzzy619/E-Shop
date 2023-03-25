@@ -36,7 +36,7 @@ class RegisterSerializer(serializers.Serializer):
             )
         except IntegrityError:
             raise serializers.ValidationError(
-                detail={"error": "User with provided credentials already exists", "status":False}
+                detail={"error": "User with provided credentials already exists", "status": False}
             )
 
         return user

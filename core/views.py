@@ -29,6 +29,19 @@ from .serializers import (
 
 
 class ProfileView(GenericAPIView):
+    """
+    Provides a Summary detail containing the Profile Information
+
+    of the currently logged in User.
+
+    Provides an interface to update profile
+
+    Args:
+        Authentication Access Token (JWT)
+
+    Returns:
+        object: profile
+    """
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
 
@@ -47,11 +60,12 @@ class ProfileView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
+        #* Update the database first and last name columns
         if full_name := serializer.validated_data.get("full_name", ""):
             name_split = full_name.split(" ")
             if len(name_split) >= 2:
-                user.first_name = name_split[0]
-                user.last_name = name_split[1]
+                user.first_name = name_split[0].strip()
+                user.last_name = name_split[1].strip()
                 user.save()
 
         data = serializer.data
@@ -60,6 +74,13 @@ class ProfileView(GenericAPIView):
 
 
 class RegisterView(GenericAPIView):
+    """
+    Create an account
+
+    Returns:
+
+        new_user: A newly registered user
+    """
     serializer_class = RegisterSerializer
 
     def post(self, request):
@@ -77,6 +98,21 @@ class RegisterView(GenericAPIView):
 
 
 class LoginView(TokenObtainPairView):
+    """
+    Login with either Username or Email & Password to get Authentication tokens
+
+    Args:
+
+        Login credentials (_type_): username/password OR email/password
+
+    Returns:
+
+        message: success
+
+        tokens: access and refresh
+        
+        user: user profile details
+    """
     serializer_class = TokenObtainPairSerializer
 
     def post(self, request, **kwargs):
@@ -130,6 +166,15 @@ class LoginView(TokenObtainPairView):
 
 
 class RefreshView(TokenRefreshView):
+    """
+    To get new access token after the initial one expires or becomes invalid
+
+    Args:
+        refresh_token 
+
+    Returns:
+        access_token
+    """
     serializer_class = TokenRefreshSerializer
 
     def post(self, request, *args, **kwargs):
@@ -142,6 +187,15 @@ class RefreshView(TokenRefreshView):
 
 
 class GetOTPView(GenericAPIView):
+    """
+    Call this endpoint with a registered email to get OTP
+
+    Args:
+        Email 
+
+    Returns:
+        OTP: For 2 Factor Authentication and to complete registration
+    """
     serializer_class = OTPSerializer
 
     def get(self, request, email):
@@ -156,6 +210,16 @@ class GetOTPView(GenericAPIView):
 
 
 class VerifyOTPView(GenericAPIView):
+    """
+    Verify OTP against the provided email
+
+    Args:
+        otp (string)
+        email (user_email)
+
+    Returns:
+        message: success/failure
+    """
     serializer_class = OTPSerializer
 
     def post(self, request):
@@ -183,6 +247,10 @@ class VerifyOTPView(GenericAPIView):
 
 
 class ChangePasswordView(GenericAPIView):
+    """
+    Change password 
+
+    """
     permission_classes = [IsAuthenticated]
     serializer_class = ChangePasswordSerializer
 
@@ -208,6 +276,12 @@ class ChangePasswordView(GenericAPIView):
 
 
 class GoogleSocialAuthView(APIView):
+    """
+    Login with Google by providing Auth_token
+
+    Args:
+        Auth_token 
+    """
     serializer_class = GoogleSocialAuthSerializer
 
     def post(self, request):
@@ -226,6 +300,11 @@ class GoogleSocialAuthView(APIView):
 
 
 class UserSettingsView(GenericAPIView):
+    """
+    Get and update User settings
+
+   
+    """
     serializer_class = UserSettingsSerializer
     permission_classes = [IsAuthenticated]
 

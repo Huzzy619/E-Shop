@@ -3,7 +3,7 @@ from rest_framework_nested import routers
 from . import views
 from django.urls import path
 
-router = routers.DefaultRouter()
+router = routers.DefaultRouter(trailing_slash = False)
 router.register("products", views.ProductViewSet, basename="products")
 router.register("collections", views.CollectionViewSet)
 router.register("address", views.AddressViewSet, basename="address")
@@ -19,7 +19,7 @@ carts_router.register('items', views.CartItemViewSet, basename='cart-items')
 
 # URLConf
 urlpatterns = [
-    path('products/favorite/mark/', views.LikeProductView.as_view()), 
-    path('track/order/<str:order_id>/', views.TrackOrderView.as_view())
+    path('products/favorite/mark', views.LikeProductView.as_view()), 
+    path('track/order/<str:order_id>', views.TrackOrderView.as_view())
 ]
 urlpatterns += router.urls + products_router.urls + carts_router.urls

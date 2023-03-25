@@ -88,7 +88,7 @@ SPECTACULAR_SETTINGS = {
     'SCHEMA_COERCE_PATH_PK_SUFFIX': True,
     'SCHEMA_PATH_PREFIX_TRIM': True,
 }
-
+APPEND_SLASH = False
 AUTH_USER_MODEL = "core.User"
 REST_FRAMEWORK = {
     # 'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
