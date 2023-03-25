@@ -140,6 +140,18 @@ DATABASES = {
     }
 }
 
+# Online DB
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "bxlmhfcpoomlotptakh6",
+#         "USER": "uhse33uji34zdekqqjlc",
+#         "PASSWORD": "9tA5QHAhpbfh364TQDpW",
+#         "HOST": "bxlmhfcpoomlotptakh6-postgresql.services.clever-cloud.com",
+#         "PORT": 6706,
+#     }
+# }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
