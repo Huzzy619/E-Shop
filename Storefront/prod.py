@@ -6,7 +6,7 @@ SECRET_KEY = config("SECRET_KEY")
 
 DEBUG = config("DEBUG", False, cast=bool)
 
-ALLOWED_HOSTS = ["link"]
+ALLOWED_HOSTS = ["https://e-commerce.cleverapps.io"]
 
 CSRF_TRUSTED_ORIGINS = ["https://" + host for host in ALLOWED_HOSTS]
 
