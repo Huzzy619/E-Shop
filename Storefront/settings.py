@@ -145,6 +145,18 @@ DATABASES = {
     }
 }
 
+# Online DB
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "bxlmhfcpoomlotptakh6",
+#         "USER": "uhse33uji34zdekqqjlc",
+#         "PASSWORD": "9tA5QHAhpbfh364TQDpW",
+#         "HOST": "bxlmhfcpoomlotptakh6-postgresql.services.clever-cloud.com",
+#         "PORT": 6706,
+#     }
+# }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -227,5 +239,97 @@ LOGGING = {
             "format": "{asctime} ({levelname}) -  {message}",
             "style": "{",
         },
+    },
+}
+
+# JAZZMIN CONFIG
+JAZZMIN_SETTINGS = {
+    # title of the window (Will default to current_admin_site.site_title if absent or None)
+    "site_title": "V-W ADMIN",
+    # Title on the login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
+    "site_header": "V-W SHOP",
+    # Logo to use for your site, must be present in static files, used for brand on top left
+    "site_logo": "logo.png",
+    # Logo to use for your site, must be present in static files, used for login form logo (defaults to site_logo)
+    "login_logo": "logo.png",
+    # CSS classes that are applied to the logo above
+    "site_logo_classes": "img-circle",
+    # Relative path to a favicon for your site, will default to site_logo if absent (ideally 32x32 px)
+    "site_icon": None,
+    # Welcome text on the login screen
+    "welcome_sign": "Welcome to the Virtual Wisdom Admin Section",
+    # Copyright on the footer
+    "copyright": "Virtual Wisdom Ltd",
+    # The model admin to search from the search bar, search bar omitted if excluded
+    "search_model": "shop.Product",
+    # Field name on user model that contains avatar ImageField/URLField/Charfield or a callable that receives the user
+    "user_avatar": "avatar",
+    ############
+    # Top Menu #
+    ############
+    # Links to put along the top menu
+    "topmenu_links": [
+        # Url that gets reversed (Permissions can be added)
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        # model admin to link to (Permissions checked against model)
+        # {"model": "accounts.User"},
+        # App with dropdown menu to all its models pages (Permissions checked against models)
+        {"app": "core"},
+        {"app": "likes"},
+        {"app": "shop"},
+    ],
+    #############
+    # User Menu #
+    #############
+    # Additional links to include in the user menu on the top right ("app" url type is not allowed)
+    "usermenu_links": [{"name": "Virtual Wisdom Platform"}, {"model": "auth.user"}],
+    #############
+    # Side Menu #
+    #############
+    # Whether to display the side menu
+    "show_sidebar": True,
+    # Whether to aut expand the menu
+    "navigation_expanded": True,
+    # Hide these apps when generating side menu e.g (auth)
+    "hide_apps": [],
+    # Hide these models when generating side menu (e.g auth.user)
+    "hide_models": [],
+    # List of apps (and/or models) to base side menu ordering off of (does not need to contain all apps/models)
+    "order_with_respect_to": ["auth", "core", "core.user", "shop.product"],
+    # Custom icons for side menu apps/models See https://fontawesome.com/icons?d=gallery&m=free&v=5.0.0,5.0.1,5.0.10,5.0.11,5.0.12,5.0.13,5.0.2,5.0.3,5.0.4,5.0.5,5.0.6,5.0.7,5.0.8,5.0.9,5.1.0,5.1.1,5.2.0,5.3.0,5.3.1,5.4.0,5.4.1,5.4.2,5.13.0,5.12.0,5.11.2,5.11.1,5.10.0,5.9.0,5.8.2,5.8.1,5.7.2,5.7.1,5.7.0,5.6.3,5.5.0,5.4.2
+    # for the full list of 5.13.0 free icon classes
+    "icons": {
+        "auth.group": "fas fa-users",
+        "authtoken.token": "fas fa-key",
+        "core.user": "fas fa-user",
+        "core.otp": "fas fa-circle-9",
+        "core.profile": "fas fa-user",
+        "core.usersettings": "fas fa-gear",
+        "likes.like": "fas fa-heart",
+        "shop.billingaddress": "fas fa-map-pin",
+        "shop.cart": "fas fa-shopping-cart",
+        "shop.cartitem": "fas fa-cart-plus",
+        "shop.collection": "fas fa-list-ul",
+        "shop.color": "fas fa-palette",
+        "shop.order": "fas fa-receipt",
+        "shop.orderitem": "fas fa-shopping-cart",
+        "shop.product": "fas fa-shopping-basket",
+        "shop.productimage": "fas fa-file-image",
+        "shop.review": "fas fa-star",
+        "shop.size": "fas fa-expand",
+        "shop.trackorder": "fas fa-map-marker",
+    },
+    # Icons that are used when one is not manually specified
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    #############
+    # UI Tweaks #
+    #############
+    "show_ui_builder": False,
+    "changeform_format": "horizontal_tabs",
+    # override change forms on a per modeladmin basis
+    "changeform_format_overrides": {
+        "auth.user": "collapsible",
+        "auth.group": "vertical_tabs",
     },
 }
