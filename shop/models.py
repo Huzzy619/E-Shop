@@ -54,7 +54,9 @@ class Product(models.Model):
     likes = GenericRelation(Like)
     colors = models.ManyToManyField(Color, blank=True)
     sizes = models.ManyToManyField(Size, blank=True)
-
+    is_digital = models.BooleanField(default=False)
+    url = models.URLField(max_length=500, null=True, blank=True)
+    
     def __str__(self) -> str:
         return self.title
 

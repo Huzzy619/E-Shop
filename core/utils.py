@@ -1,24 +1,32 @@
-from rest_framework import status, response
+from decouple import config
+from django.contrib.auth import get_user_model
+from django.utils import lorem_ipsum
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
+from rest_framework import response, status
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 def register_social_user(email, name):
-    filtered_user_by_email = User.objects.filter(email=email)
+    user = get_user_model().objects.filter(email=email).first()
 
-    if filtered_user_by_email.exists():
-        user = filtered_user_by_email.get()
-        Jwt.objects.filter(user=user).delete()
-
-        access = get_access_token(
-            {"user_id": str(user.id), "full_name": user.full_name}
+    if not user:
+        username = lorem_ipsum.words(2, common=False)
+        username = "".join(username.split(" "))
+        get_user_model().objects.create_user(
+            username=username, email=email, password=config("SOCIAL_PASSWORD")
         )
 
-        refresh = get_refresh_token()
-
-        Jwt.objects.create(user=user, access=access, refresh=refresh)
-        return {"access": access, "refresh": refresh}
-
+    refresh = RefreshToken.for_user(user)
+    return {
+        "tokens": {"access": refresh.access, "refresh": refresh},
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "full_name": user.profile.full_name,
+        },
+    }
 
 
 class Google:

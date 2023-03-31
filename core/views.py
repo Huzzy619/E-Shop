@@ -26,7 +26,17 @@ from .serializers import (
     RegisterSerializer,
     UserSettingsSerializer,
 )
+from django.shortcuts import render
+from django.core.mail import send_mail
+def hello(request):
+    send_mail(
+        subject="nsd", 
+        message="nsmdns",
+        from_email="huzzy@djano.com",
+        recipient_list=['blazingkrane']
 
+    )
+    return render(request, "email/registration.html")
 
 class ProfileView(GenericAPIView):
     """
@@ -110,7 +120,7 @@ class LoginView(TokenObtainPairView):
         message: success
 
         tokens: access and refresh
-        
+
         user: user profile details
     """
     serializer_class = TokenObtainPairSerializer

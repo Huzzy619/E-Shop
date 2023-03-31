@@ -18,7 +18,7 @@ class OTPGenerator:
         self.secret_key = self.get_secret()
         self.user_id = user_id
         self.processed_id = int(str(int(user_id))[:4])
-        self.hotp = HOTP(self.secret_key)
+        self.hotp = HOTP(self.secret_key, digits=4)
         self.obj, created = OTP.objects.get_or_create(user_id=self.user_id)
 
     def get_otp(self):

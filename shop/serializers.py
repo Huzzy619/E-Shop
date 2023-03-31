@@ -90,9 +90,15 @@ class ReviewSerializer(serializers.Serializer):
 
 
 class SimpleProductSerializer(serializers.ModelSerializer):
+    product_url  = serializers.SerializerMethodField()
     class Meta:
         model = Product
-        fields = ["id", "title", "unit_price"]
+        fields = ["id", "title", "unit_price", "product_url"]
+    
+    def get_product_url(self, product):
+        if product.is_digital:
+            return product.url
+        return None
 
 
 class CartItemSerializer(serializers.ModelSerializer):

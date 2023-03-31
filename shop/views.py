@@ -13,7 +13,7 @@ from rest_framework.mixins import (
     ListModelMixin,
     RetrieveModelMixin,
 )
-from rest_framework.permissions import SAFE_METHODS, IsAdminUser, IsAuthenticated
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
@@ -44,13 +44,19 @@ class CollectionViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
 
 class ProductViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
-    queryset = Product.objects.prefetch_related("images").all()
+    queryset = Product.objects.prefetch_related("colors", "sizes", "images").all()
     serializer_class = shop_serializer.ProductSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
     pagination_class = DefaultPagination
     permission_classes = [IsAdminOrReadOnly]
-    search_fields = ["title", "description", "collection__name", "colors__color", "sizes__size", ]
+    search_fields = [
+        "title",
+        "description",
+        "collection__name",
+        "colors__color",
+        "sizes__size",
+    ]
     ordering_fields = ["unit_price", "last_update", "category"]
 
     def get_serializer_context(self):
