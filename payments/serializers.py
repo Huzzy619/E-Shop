@@ -1,7 +1,9 @@
-from rest_framework import serializers
 import stripe
-from .models import PaymentMethod 
 from django.conf import settings
+from rest_framework import serializers
+
+from .models import PaymentMethod
+
 
 class PaymentCardSerializer(serializers.Serializer):
     card_number = serializers.IntegerField()
@@ -72,9 +74,7 @@ class PaymentCardSerializer(serializers.Serializer):
                 "exp_year": data["expiry_year"],
                 "cvc": data["cvc"],
             },
-            billing_details={
-                "name": data["card_holder_name"]
-            }
+            billing_details={"name": data["card_holder_name"]},
         )
         stripe.PaymentMethod.attach(pm.id, customer=customer.id)
         PaymentMethod.objects.create(user=user, pm_id=pm.id)
@@ -92,6 +92,7 @@ class PaymentCardSerializer(serializers.Serializer):
             "status": True,
         }
         return response_data
+
 
 class MakePaymentSerializer(serializers.Serializer):
     order_id = serializers.CharField()

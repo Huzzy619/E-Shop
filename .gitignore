@@ -134,3 +134,4 @@ dmypy.json
 playground/
 general.log
 media/store/
+.idea/

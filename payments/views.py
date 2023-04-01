@@ -9,7 +9,7 @@ from shop.models import BillingAddress, Order
 
 from .models import PaymentMethod
 from .serializers import MakePaymentSerializer, PaymentCardSerializer
-from django.conf import settings
+
 
 # Create your views here.
 class AddPaymentCardView(APIView):
@@ -121,42 +121,46 @@ class MakePayment(APIView):
 
         amount_payable = int(settings.SHIPPING_FEES) + order.get_total_price()
 
-        try:
-            payment = stripe.PaymentIntent.create(
-                amount=amount_payable * 100,
-                currency="usd",
-                customer=user.cus_id,
-                payment_method=card_id,
-                confirm=True,
-            )
+        # try:
+    
+        payment = stripe.PaymentIntent.create(
+            amount= int(amount_payable * 100),
+            currency="usd",
+            customer=user.cus_id,
+            payment_method=card_id,
+            confirm=True,
+        )
 
-            if payment["status"] == "succeeded":
-                order.payment_status = "complete"
-                order.save()
+        if payment["status"] == "succeeded":
+            order.payment_status = "complete"
+            order.save()
 
-                # Reduce quantities from inventory
-                for item in order.items.all():
-                    item.product.inventory -= item.quantity
+            # Reduce quantities from inventory
+            for item in order.items.all():
+                item.product.inventory -= item.quantity
 
-                    item.product.save()
+                item.product.save()
 
-                return Response(
-                    {
-                        "message": "Payment successful",
-                        "payment_data": {
-                            "tx_ref": order.tx_ref,
-                            "amount": order.get_cart_total,
-                            "shipping_fees": int(settings.SHIPPING_FEES),
-                        },
-                        "status": True,
+            return Response(
+                {
+                    "message": "Payment successful",
+                    "payment_data": {
+                        "tx_ref": order.id,
+                        "amount": order.get_total_price(),
+                        "shipping_fees": int(settings.SHIPPING_FEES),
                     },
-                    status=status.HTTP_200_OK,
-                )
-            else:
-                order.payment_status = "failed"
-                order.save()
-                return Response(
-                    {"message": "Payment failed", "status": False}, status=status.HTTP_400_BAD_REQUEST
-                )
-        except Exception as e:
-            return Response({"message": str(e), "status": False}, status=status.HTTP_400_BAD_REQUEST)
+                    "status": True,
+                },
+                status=status.HTTP_200_OK,
+            )
+        else:
+            order.payment_status = "failed"
+            order.save()
+            return Response(
+                {"message": "Payment failed", "status": False},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # except Exception as e:
+        #     return Response(
+        #         {"message": str(e), "status": False}, status=status.HTTP_400_BAD_REQUEST
+        #     )
