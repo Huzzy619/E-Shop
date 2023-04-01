@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     "core",
     "shop",
     "likes",
-    # "playground",
+    "payments",
 ]
 
 MIDDLEWARE = [
@@ -135,27 +135,14 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     },
-
-    "default1":{
+    "default1": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "e-shop",
         "USER": "postgres",
         "PASSWORD": "0509",
-        "HOST": "localhost"
-    }
+        "HOST": "localhost",
+    },
 }
-
-# Online DB
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "bxlmhfcpoomlotptakh6",
-#         "USER": "uhse33uji34zdekqqjlc",
-#         "PASSWORD": "9tA5QHAhpbfh364TQDpW",
-#         "HOST": "bxlmhfcpoomlotptakh6-postgresql.services.clever-cloud.com",
-#         "PORT": 6706,
-#     }
-# }
 
 
 # Password validation
@@ -242,8 +229,11 @@ LOGGING = {
     },
 }
 
+SHIPPING_FEES = config("SHIPPING_FEES", 0)
+
 # JAZZMIN CONFIG
 JAZZMIN_SETTINGS = {
+    "site_brand": "V-W ADMIN",
     # title of the window (Will default to current_admin_site.site_title if absent or None)
     "site_title": "V-W ADMIN",
     # Title on the login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
@@ -325,11 +315,43 @@ JAZZMIN_SETTINGS = {
     #############
     # UI Tweaks #
     #############
-    "show_ui_builder": False,
+    "show_ui_builder": True,
     "changeform_format": "horizontal_tabs",
     # override change forms on a per modeladmin basis
     "changeform_format_overrides": {
         "auth.user": "collapsible",
         "auth.group": "vertical_tabs",
     },
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-pink",
+    "accent": "accent-pink",
+    "navbar": "navbar-pink navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": True,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-light-pink",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "flatly",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-outline-primary",
+        "secondary": "btn-outline-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
 }

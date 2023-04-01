@@ -24,7 +24,7 @@ class Size(models.Model):
     def __str__(self) -> str:
         return str(self.size)
 
-    
+
 class Collection(models.Model):
     title = models.CharField(max_length=255)
     featured_product = models.ForeignKey(
@@ -55,7 +55,7 @@ class Product(models.Model):
     sizes = models.ManyToManyField(Size, blank=True)
     is_digital = models.BooleanField(default=False)
     url = models.URLField(max_length=500, null=True, blank=True)
-    
+
     def __str__(self) -> str:
         return self.title
 
@@ -63,21 +63,21 @@ class Product(models.Model):
     def rating(self):
         total_reviews = self.reviews.count()
         sum_of_ratings = sum([item.ratings for item in self.reviews.all()])
-        
+
         try:
             rating = float(sum_of_ratings / total_reviews)
         except ZeroDivisionError:
             rating = 1.0
 
-        return rating  
-    
+        return rating
+
     @property
     def total_review(self):
         total = self.reviews.count()
         if total < 1:
             return 1
-        return total  
-        
+        return total
+
     class Meta:
         ordering = ["title"]
 
@@ -106,7 +106,7 @@ class Order(models.Model):
         max_length=10, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING
     )
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
-
+    shipping_address = models.CharField(blank=True, null=True, max_length=1000)
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -121,6 +121,11 @@ class Order(models.Model):
         value = "".join(random.choice(chars) for _ in range(length))
 
         return "#" + value
+
+    def get_total_price(self):
+        return sum(
+            [item.quantity * item.product.unit_price for item in self.items.all()]
+        )
 
     class Meta:
         permissions = [("cancel_order", "Can cancel order")]

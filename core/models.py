@@ -13,6 +13,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
 
     is_verified = models.BooleanField(default=False)
+    cus_id = models.CharField(max_length=200, null=True, unique=True)
 
     def __str__(self) -> str:
         full_name = self.profile.full_name
