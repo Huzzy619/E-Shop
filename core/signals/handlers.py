@@ -8,6 +8,7 @@ from ..otp import OTPGenerator
 # from . import new_user_signal, reset_password_signal, verification_signal
 # from notifications.models import Notification
 import stripe
+from django.conf import settings
 
 @receiver(post_save, sender=get_user_model())
 def create_user_profile_and_settings(instance, created, **kwargs):
@@ -26,6 +27,7 @@ def create_user_profile_and_settings(instance, created, **kwargs):
         context={"code": code, "name": instance.username},
         )
 
+        stripe.api_key = settings.STRIPE_SECRET_KEY
         customer = stripe.Customer.create(email=instance.email)
 
         instance.cus_id = customer.id 

@@ -9,7 +9,7 @@ from shop.models import BillingAddress, Order
 
 from .models import PaymentMethod
 from .serializers import MakePaymentSerializer, PaymentCardSerializer
-
+from django.conf import settings
 
 # Create your views here.
 class AddPaymentCardView(APIView):
@@ -29,6 +29,7 @@ class PaymentMethodList(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        stripe.api_key = settings.STRIPE_SECRET_KEY
         user = request.user
         if not user.cus_id:
             return Response(
@@ -57,7 +58,7 @@ class PaymentMethodList(APIView):
                     "status": True,
                     "data": cards,
                 },
-                status=200,
+                status=status.HTTP_200_OK,
             )
         except Exception as e:
             print(e)
@@ -72,6 +73,7 @@ class MakePayment(APIView):
     serializer_class = MakePaymentSerializer
 
     def post(self, request):
+        stripe.api_key = settings.STRIPE_SECRET_KEY
         user = request.user
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -148,13 +150,13 @@ class MakePayment(APIView):
                         },
                         "status": True,
                     },
-                    status=200,
+                    status=status.HTTP_200_OK,
                 )
             else:
                 order.payment_status = "failed"
                 order.save()
                 return Response(
-                    {"message": "Payment failed", "status": False}, status=400
+                    {"message": "Payment failed", "status": False}, status=status.HTTP_400_BAD_REQUEST
                 )
         except Exception as e:
-            return Response({"message": str(e), "status": False}, status=400)
+            return Response({"message": str(e), "status": False}, status=status.HTTP_400_BAD_REQUEST)

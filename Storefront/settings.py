@@ -179,6 +179,8 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "localhost"
 EMAIL_PORT = 2525
 
+STRIPE_PUBLISHABLE_KEY =config('STRIPE_PUBLISHABLE_KEY', "") 
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', "")
 # from django
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/

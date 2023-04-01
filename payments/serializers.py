@@ -1,7 +1,7 @@
 from rest_framework import serializers
 import stripe
 from .models import PaymentMethod 
-
+from django.conf import settings
 
 class PaymentCardSerializer(serializers.Serializer):
     card_number = serializers.IntegerField()
@@ -11,6 +11,7 @@ class PaymentCardSerializer(serializers.Serializer):
     card_holder_name = serializers.CharField(max_length=100)
 
     def validate(self, data):
+        stripe.api_key = settings.STRIPE_SECRET_KEY
         card_number = data.get("card_number")
         expiry_month = data.get("expiry_month")
         expiry_year = data.get("expiry_year")
