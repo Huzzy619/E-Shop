@@ -26,7 +26,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("accounts/", include("core.urls")),
     path("shop/", include("shop.urls")),
-    path("payments", include("payments.urls")), 
+    path("payments/", include("payments.urls")), 
 
     path("__debug__/", include("debug_toolbar.urls")), 
 
