@@ -211,7 +211,7 @@ class TrackOrderView(GenericAPIView):
             _status = serializer.validated_data["status"]
         except KeyError:
             return Response(
-                {"error": "Invalid data", "status": False},
+                {"message": "Invalid data", "status": False},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

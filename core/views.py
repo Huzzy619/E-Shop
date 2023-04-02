@@ -147,14 +147,20 @@ class LoginView(TokenObtainPairView):
 
         if not user:
             return Response(
-                {"error": "Invalid credentials", "status": False},
+                {"message": "Email or password is incorrect", "status": False},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
         if not user.is_active:
             return Response(
-                {"error": "Account is not active, contact the admin", "status": False},
+                {"message": "Account is not active, contact the admin", "status": False},
                 status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        if not user.is_verified:
+            return Response(
+                    {"message": "You must verify your email first", "status": False},
+                    status=401,
             )
 
         request.data["username"] = username__email
@@ -274,7 +280,7 @@ class ChangePasswordView(GenericAPIView):
             password_validation.validate_password(password, request.user)
         except Exception as e:
             return Response(
-                {"error": e, "status": False}, status=status.HTTP_403_FORBIDDEN
+                {"message": e, "status": False}, status=status.HTTP_403_FORBIDDEN
             )
 
         request.user.set_password(password)
