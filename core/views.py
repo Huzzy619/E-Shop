@@ -279,7 +279,6 @@ class OTPChangePasswordView(GenericAPIView):
 
         user.set_password(password)
         user.save()
-        otp.delete()
         return Response({"message": "Password updated successfully", "status": "success"}, status=status.HTTP_200_OK)
 
 

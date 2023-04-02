@@ -16,7 +16,7 @@ class Color(models.Model):
     color_code = models.CharField(max_length=30, null=True, blank=True)
 
     def __str__(self) -> str:
-        return self.color
+        return self.color_code
 
 
 class Size(models.Model):
