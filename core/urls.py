@@ -14,5 +14,6 @@ urlpatterns = [
     path("otp/verify", views.VerifyOTPView.as_view()),
     path("user/profile", views.ProfileView.as_view()), 
     path("change/password", views.ChangePasswordView.as_view()),
+    path("otp/change/password", views.OTPChangePasswordView.as_view()),
     path("user/settings", views.UserSettingsView.as_view())
 ]

@@ -24,6 +24,8 @@ class InventoryFilter(admin.SimpleListFilter):
 class ProductImageInline(admin.TabularInline):
     model = models.ProductImage
     readonly_fields = ["thumbnail"]
+    min_num = 1
+    max_num = 6
 
     def thumbnail(self, instance):
         if instance.image.name != "":
@@ -99,3 +101,10 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline]
     list_display = ["id", "placed_at", "customer"]
     search_fields = ["payment_status", "customer"]
+
+
+@admin.register(models.ProductSizeColorInventory)
+class ProductSizeColorInventoryAdmin(admin.ModelAdmin):
+    list_display = ['product', 'color', 'size', 'quantity', 'unit_price']
+    list_filter = ["product", "unit_price", 'quantity']
+    list_per_page = 10

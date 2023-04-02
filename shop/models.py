@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -12,7 +13,7 @@ from shop.validators import validate_file_size
 
 
 class Color(models.Model):
-    color = models.CharField(max_length=30, null=True, blank=True)
+    color_code = models.CharField(max_length=30, null=True, blank=True)
 
     def __str__(self) -> str:
         return self.color
@@ -28,7 +29,7 @@ class Size(models.Model):
 class Collection(models.Model):
     title = models.CharField(max_length=255)
     featured_product = models.ForeignKey(
-        "Product", on_delete=models.SET_NULL, null=True, related_name="+", blank=True
+            "Product", on_delete=models.SET_NULL, null=True, related_name="+", blank=True
     )
 
     def __str__(self) -> str:
@@ -42,13 +43,13 @@ class Product(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     unit_price = models.DecimalField(
-        max_digits=6, decimal_places=2, validators=[MinValueValidator(1)]
+            max_digits=6, decimal_places=2, validators=[MinValueValidator(1)]
     )
     inventory = models.IntegerField(validators=[MinValueValidator(0)])
     date_posted = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(
-        Collection, on_delete=models.PROTECT, related_name="products"
+            Collection, on_delete=models.PROTECT, related_name="products"
     )
     likes = GenericRelation(Like)
     colors = models.ManyToManyField(Color, blank=True)
@@ -84,11 +85,37 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, related_name="images"
+            Product, on_delete=models.CASCADE, related_name="images"
     )
     image = models.ImageField(upload_to="store/images", validators=[validate_file_size])
     colors = models.ManyToManyField(Color, blank=True)
     sizes = models.ManyToManyField(Size, blank=True)
+
+
+class ProductSizeColorInventory(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_size_color_inventory")
+    color = models.ForeignKey(Color, on_delete=models.CASCADE, related_name="product_color")
+    size = models.ForeignKey(Size, on_delete=models.CASCADE, related_name="product_size")
+    quantity = models.IntegerField(default=0)
+    unit_price = models.DecimalField(
+            max_digits=6, decimal_places=2, validators=[MinValueValidator(1)]
+    )
+
+    class Meta:
+        verbose_name_plural = "Product Size & Inventories"
+
+    def __str__(self):
+        return f"{self.product.name}---{self.size}-----{self.quantity}"
+
+    def clean(self):
+        total_quantity = self.product.productsizeinventory_set.aggregate(
+                total_quantity=models.Sum('quantity'))['total_quantity']
+        if total_quantity + self.quantity > self.product.inventory:
+            raise ValidationError(
+                    "Total quantity of this product size inventory exceeds the amount in stock.")
+        if self.quantity == 0:
+            raise ValidationError(
+                    "This product size is no more in stock.")
 
 
 class Order(models.Model):
@@ -103,7 +130,7 @@ class Order(models.Model):
     id = models.CharField(primary_key=True, max_length=10)
     placed_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(
-        max_length=10, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING
+            max_length=10, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING
     )
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     shipping_address = models.CharField(blank=True, null=True, max_length=1000)
@@ -124,7 +151,7 @@ class Order(models.Model):
 
     def get_total_price(self):
         return sum(
-            [item.quantity * item.product.unit_price for item in self.items.all()]
+                [item.quantity * item.product.unit_price for item in self.items.all()]
         )
 
     class Meta:
@@ -139,7 +166,7 @@ class TrackOrder(models.Model):
     ]
 
     order = models.OneToOneField(
-        Order, on_delete=models.CASCADE, related_name="tracking"
+            Order, on_delete=models.CASCADE, related_name="tracking"
     )
     status = models.CharField(choices=ORDER_STATUS, default="checking", max_length=200)
     checking_date = models.DateTimeField(auto_now_add=True)
@@ -150,7 +177,7 @@ class TrackOrder(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name="items")
     product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name="orderitems"
+            Product, on_delete=models.PROTECT, related_name="orderitems"
     )
     quantity = models.PositiveSmallIntegerField()
     unit_price = models.DecimalField(max_digits=6, decimal_places=2)
@@ -178,10 +205,10 @@ class CartItem(models.Model):
 
 class Review(models.Model):
     product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, related_name="reviews"
+            Product, on_delete=models.CASCADE, related_name="reviews"
     )
     rating = models.IntegerField(
-        validators=[MaxValueValidator(5), MinValueValidator(1)]
+            validators=[MaxValueValidator(5), MinValueValidator(1)]
     )
     description = models.TextField()
     date = models.DateField(auto_now_add=True)

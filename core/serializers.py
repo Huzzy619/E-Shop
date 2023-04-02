@@ -1,3 +1,5 @@
+import re
+
 from decouple import config
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
@@ -50,6 +52,23 @@ class LoginSerializer(serializers.Serializer):
 class OTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=6)
+
+
+class OTPChangePasswordSerializer(serializers.Serializer):
+    otp = serializers.IntegerField()
+    password = serializers.CharField(max_length=50, min_length=6, write_only=True)
+
+    def validate(self, attrs):
+        otp = attrs.get('otp', '')
+
+        # validate code
+        if not otp:
+            raise serializers.ValidationError("OTP is required")
+
+        if not re.match("^[0-9]{4}$", str(otp)):
+            raise serializers.ValidationError("OTP must be a 4-digit number")
+
+        return attrs
 
 
 class ChangePasswordSerializer(serializers.Serializer):
