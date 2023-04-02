@@ -124,7 +124,7 @@ class MakePayment(APIView):
         try:
     
             payment = stripe.PaymentIntent.create(
-                amount= int(amount_payable),
+                amount= int(amount_payable * 100),
                 currency="usd",
                 customer=user.cus_id,
                 payment_method=card_id,

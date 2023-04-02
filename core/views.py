@@ -147,7 +147,7 @@ class LoginView(TokenObtainPairView):
 
         if not user:
             return Response(
-                {"message": "Email or password is incorrect", "status": False},
+                {"message": "Email/Username or password is incorrect", "status": False},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
@@ -160,7 +160,7 @@ class LoginView(TokenObtainPairView):
         if not user.is_verified:
             return Response(
                     {"message": "You must verify your email first", "status": False},
-                    status=401,
+                    status=status.HTTP_401_UNAUTHORIZED,
             )
 
         request.data["username"] = username__email
