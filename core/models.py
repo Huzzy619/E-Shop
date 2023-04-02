@@ -31,7 +31,7 @@ class Profile(models.Model):
 
     full_name = models.CharField(max_length=550, null=True, blank=True)
     phone = models.CharField(max_length=14, validators=[validate_phone_number])
-    image = models.ImageField(default="default.jpg", upload_to="profile_pictures")
+    image = models.URLField()
     date_of_birth = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=10, choices=GENDER, default="None")
     date_created = models.DateTimeField(auto_now_add=True)
