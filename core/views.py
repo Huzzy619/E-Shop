@@ -100,8 +100,8 @@ class RegisterView(GenericAPIView):
 
         return Response(
             {
+                "message": "Registered successfully. Check email for OTP",
                 "status": True,
-                "detail": "Registered successfully. Check email for OTP",
             },
             status=status.HTTP_201_CREATED,
         )
@@ -168,7 +168,7 @@ class LoginView(TokenObtainPairView):
         return Response(
             {
                 "status": True,
-                "detail": "Logged in successfully",
+                "message": "Logged in successfully",
                 "tokens": tokens.data,
                 "user": {
                     "id": user.id,
@@ -255,11 +255,11 @@ class VerifyOTPView(GenericAPIView):
             user.save()
 
             return Response(
-                {"detail": "2FA successfully completed", "status": True},
+                {"message": "2FA successfully completed", "status": True},
                 status=status.HTTP_202_ACCEPTED,
             )
 
-        return Response({"detail": "Invalid otp"}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"message": "Invalid otp"}, status=status.HTTP_403_FORBIDDEN)
 
 
 class ChangePasswordView(GenericAPIView):
@@ -286,7 +286,7 @@ class ChangePasswordView(GenericAPIView):
         request.user.set_password(password)
         request.user.save()
         return Response(
-            {"detail": "Password updated successfully", "status": True},
+            {"message": "Password updated successfully", "status": True},
             status=status.HTTP_200_OK,
         )
 
