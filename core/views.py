@@ -25,18 +25,10 @@ from .serializers import (
     ProfileSerializer,
     RegisterSerializer,
     UserSettingsSerializer,
+    FacebookSocialAuthSerializer
 )
-from django.shortcuts import render
-from django.core.mail import send_mail
-def hello(request):
-    send_mail(
-        subject="nsd", 
-        message="nsmdns",
-        from_email="huzzy@djano.com",
-        recipient_list=['blazingkrane']
 
-    )
-    return render(request, "email/registration.html")
+
 
 class ProfileView(GenericAPIView):
     """
@@ -314,7 +306,22 @@ class GoogleSocialAuthView(APIView):
         data["status"]: True
         return Response(data, status=status.HTTP_200_OK)
 
+class FacebookSocialAuthView(APIView):
+    serializer_class = FacebookSocialAuthSerializer
 
+    
+    def post(self, request):
+        """
+        POST with "auth_token"
+        Send an access token as from facebook to get user information
+        """
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        data['status'] = True
+        return Response(data, status=status.HTTP_200_OK)
+        
 class UserSettingsView(GenericAPIView):
     """
     Get and update User settings

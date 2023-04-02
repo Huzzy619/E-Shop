@@ -94,7 +94,7 @@ REST_FRAMEWORK = {
     ),
     "COERCE_DECIMAL_TO_STRING": False,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "NON_FIELD_ERRORS_KEY": "error",
+    "NON_FIELD_ERRORS_KEY": "message",
 }
 
 SIMPLE_JWT = {

@@ -134,7 +134,7 @@ class AddCartItemSerializer(serializers.ModelSerializer):
     def validate_product_id(self, value):
         if not Product.objects.filter(pk=value).exists():
             raise serializers.ValidationError(
-                {"error": "No product with the given ID was found."}
+                {"message": "No product with the given ID was found."}
             )
         return value
 
@@ -220,7 +220,7 @@ class CreateOrderSerializer(serializers.Serializer):
                 if item.product.inventory < 0:
                     raise serializers.ValidationError(
                         {
-                            "error": "There is not enough product to complete the order",
+                            "message": "There is not enough product to complete the order",
                             "status": False,
                             "detail": {
                                 "id": item.product.id,

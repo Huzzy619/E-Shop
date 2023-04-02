@@ -1,3 +1,4 @@
+import facebook
 from decouple import config
 from django.contrib.auth import get_user_model
 from django.utils import lorem_ipsum
@@ -7,7 +8,7 @@ from rest_framework import response, status
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
-def register_social_user(email, name):
+def register_social_user(email, name = None):
     user = get_user_model().objects.filter(email=email).first()
 
     if not user:
@@ -45,7 +46,30 @@ class Google:
         except:
             return response.Response(
                 {
-                    "error": "The token is either invalid or has expired",
+                    "message": "The token is either invalid or has expired",
+                    "status": False,
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+class Facebook:
+    """
+    Facebook class to fetch the user info and return it
+    """
+
+    @staticmethod
+    def validate(auth_token):
+        """
+        validate method Queries the facebook GraphAPI to fetch the user info
+        """
+        try:
+            graph = facebook.GraphAPI(access_token=auth_token)
+            profile = graph.request("/me?fields=name,email")
+            return profile
+        except:
+            return response.Response(
+                {
+                    "message": "The token is either invalid or has expired",
                     "status": False,
                 },
                 status=status.HTTP_401_UNAUTHORIZED,

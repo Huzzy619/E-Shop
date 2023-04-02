@@ -16,7 +16,7 @@ class LikeSerializer (serializers.ModelSerializer):
     def save(self, **kwargs):
         if self.model is None or self.model == '':
             raise serializers.ValidationError(
-                {"error": "No model_name was specified"})
+                {"message": "No model_name was specified"})
 
         content_type = ContentType.objects.get_for_model(self.model)
         user = get_user_model().objects.get(id=self.context['user'].id)
@@ -25,7 +25,7 @@ class LikeSerializer (serializers.ModelSerializer):
             obj = self.model.objects.get(id=self.validated_data['object_id'])
         except Exception:
             raise serializers.ValidationError(
-                {'error': f'{self.model.__name__} does not exist'})
+                {'message': f'{self.model.__name__} does not exist'})
 
         if like := Like.objects.filter(user_id=user.id, object_id=self.validated_data['object_id'], content_type=content_type):
             like.delete()

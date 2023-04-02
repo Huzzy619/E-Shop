@@ -1,11 +1,13 @@
-from . import views
 from django.urls import path
+
+from . import views
 
 urlpatterns = [
     path('register', views.RegisterView.as_view()),
 
     path('login', views.LoginView.as_view()),
     path('login/google', views.GoogleSocialAuthView.as_view()),
+    path("login/facebook", views.FacebookSocialAuthView.as_view()),
 
     path('refresh/token', views.RefreshView.as_view()), 
     path("otp/send/<str:email>", views.GetOTPView.as_view()),
