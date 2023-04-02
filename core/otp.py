@@ -22,7 +22,6 @@ class OTPGenerator:
         self.obj, created = OTP.objects.get_or_create(user_id=self.user_id)
 
     def get_otp(self):
-
         value = self.processed_id + self.obj.counter
         otp = self.hotp.at(value)
 
