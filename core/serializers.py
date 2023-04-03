@@ -2,6 +2,8 @@ import re
 
 from decouple import config
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db.utils import IntegrityError
 from rest_framework import serializers
 
@@ -127,3 +129,17 @@ class UserSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSettings
         exclude = ['id', 'user']
+
+
+class ResendEmailVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate(self, attrs):
+        email = attrs.get('email', '')
+
+        # validate email
+        try:
+            validate_email(email)
+        except ValidationError:
+            raise serializers.ValidationError("Invalid email format")
+        return attrs

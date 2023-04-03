@@ -92,9 +92,8 @@ class ProductImage(models.Model):
     sizes = models.ManyToManyField(Size, blank=True)
 
 
-class ProductSizeColorInventory(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_size_color_inventory")
-    color = models.ForeignKey(Color, on_delete=models.CASCADE, related_name="product_color")
+class ProductSizeInventory(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_size_inventory")
     size = models.ForeignKey(Size, on_delete=models.CASCADE, related_name="product_size")
     quantity = models.IntegerField(default=0)
     unit_price = models.DecimalField(
@@ -108,7 +107,32 @@ class ProductSizeColorInventory(models.Model):
         return self.product.title
 
     def clean(self):
-        total_quantity = self.product.product_size_color_inventory.aggregate(
+        total_quantity = self.product.product_size_inventory.aggregate(
+                total_quantity=models.Sum('quantity'))['total_quantity'] or 0
+        if total_quantity + self.quantity > self.product.inventory:
+            raise ValidationError(
+                    "Total quantity of this product size inventory exceeds the amount in stock.")
+        if self.quantity == 0:
+            raise ValidationError(
+                    "This product size is no more in stock.")
+
+
+class ProductColorInventory(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_color_inventory")
+    color = models.ForeignKey(Color, on_delete=models.CASCADE, related_name="product_color")
+    quantity = models.IntegerField(default=0)
+    unit_price = models.DecimalField(
+            max_digits=6, decimal_places=2, validators=[MinValueValidator(1)]
+    )
+
+    class Meta:
+        verbose_name_plural = "Product Size & Inventories"
+
+    def __str__(self):
+        return self.product.title
+
+    def clean(self):
+        total_quantity = self.product.product_color_inventory.aggregate(
                 total_quantity=models.Sum('quantity'))['total_quantity'] or 0
         if total_quantity + self.quantity > self.product.inventory:
             raise ValidationError(

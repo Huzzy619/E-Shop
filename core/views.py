@@ -1,6 +1,5 @@
 from django.contrib.auth import authenticate, get_user_model, password_validation
 from django.core.exceptions import ValidationError
-
 # Create your views here.
 from django.core.validators import validate_email
 from django.shortcuts import get_object_or_404
@@ -16,7 +15,6 @@ from rest_framework_simplejwt.serializers import (
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from core.signals import complete_order_signal, reset_password_signal
-
 from .models import Profile, User, UserSettings
 from .otp import OTPGenerator
 from .serializers import (
@@ -28,7 +26,7 @@ from .serializers import (
     OTPSerializer,
     ProfileSerializer,
     RegisterSerializer,
-    UserSettingsSerializer,
+    ResendEmailVerificationSerializer, UserSettingsSerializer,
 )
 
 
@@ -95,11 +93,11 @@ class RegisterView(GenericAPIView):
         serializer.save()
 
         return Response(
-            {
-                "message": "Registered successfully. Check email for OTP",
-                "status": True,
-            },
-            status=status.HTTP_201_CREATED,
+                {
+                    "message": "Registered successfully. Check email for OTP",
+                    "status": True,
+                },
+                status=status.HTTP_201_CREATED,
         )
 
 
@@ -144,48 +142,48 @@ class LoginView(TokenObtainPairView):
 
         if not user:
             return Response(
-                {"message": "Email/Username or password is incorrect", "status": False},
-                status=status.HTTP_401_UNAUTHORIZED,
+                    {"message": "Email/Username or password is incorrect", "status": False},
+                    status=status.HTTP_401_UNAUTHORIZED,
             )
 
         if not user.is_active:
             return Response(
-                {
-                    "message": "Account is not active, contact the admin",
-                    "status": False,
-                },
-                status=status.HTTP_401_UNAUTHORIZED,
+                    {
+                        "message": "Account is not active, contact the admin",
+                        "status": False,
+                    },
+                    status=status.HTTP_401_UNAUTHORIZED,
             )
 
         if not user.is_verified:
             return Response(
-                {"message": "You must verify your email first", "status": False},
-                status=status.HTTP_401_UNAUTHORIZED,
+                    {"message": "You must verify your email first", "status": False},
+                    status=status.HTTP_401_UNAUTHORIZED,
             )
 
         request.data["username"] = username__email
         tokens = super().post(request)
         return Response(
-            {
-                "status": True,
-                "message": "Logged in successfully",
-                "tokens": tokens.data,
-                "user": {
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "full_name": user.profile.full_name,
-                    "date_of_birth": user.profile.date_of_birth,
-                    "phone": user.profile.phone if user.profile.phone != "" else None,
-                    "gender": user.profile.gender
-                    if user.profile.gender != "None"
-                    else None,
-                    "image": user.profile.image
-                    if user.profile.image != "default.jpg"
-                    else None,
+                {
+                    "status": True,
+                    "message": "Logged in successfully",
+                    "tokens": tokens.data,
+                    "user": {
+                        "id": user.id,
+                        "username": user.username,
+                        "email": user.email,
+                        "full_name": user.profile.full_name,
+                        "date_of_birth": user.profile.date_of_birth,
+                        "phone": user.profile.phone if user.profile.phone != "" else None,
+                        "gender": user.profile.gender
+                        if user.profile.gender != "None"
+                        else None,
+                        "image": user.profile.image
+                        if user.profile.image != "default.jpg"
+                        else None,
+                    },
                 },
-            },
-            status=status.HTTP_200_OK,
+                status=status.HTTP_200_OK,
         )
 
 
@@ -207,7 +205,7 @@ class RefreshView(TokenRefreshView):
         serializer.is_valid(raise_exception=True)
         access_token = serializer.validated_data["access"]
         return Response(
-            {"access": access_token, "status": True}, status=status.HTTP_200_OK
+                {"access": access_token, "status": True}, status=status.HTTP_200_OK
         )
 
 
@@ -229,8 +227,8 @@ class GetOTPView(GenericAPIView):
             user = get_user_model().objects.get(email=email)
         except get_user_model().DoesNotExist:
             return Response(
-                {"status": False, "message": "No user with the provided email"},
-                status=status.HTTP_404_NOT_FOUND,
+                    {"status": False, "message": "No user with the provided email"},
+                    status=status.HTTP_404_NOT_FOUND,
             )
 
         otp_gen = OTPGenerator(user_id=user.id)
@@ -239,16 +237,16 @@ class GetOTPView(GenericAPIView):
 
         if "order" in request.get_full_path():
             complete_order_signal.send(
-                __class__, code=otp, name=user.username, email=user.email
+                    __class__, code=otp, name=user.username, email=user.email
             )
         else:
             reset_password_signal.send(
-                __class__, code=otp, name=user.username, email=user.email
+                    __class__, code=otp, name=user.username, email=user.email
             )
 
         return Response(
-            {"message": "OTP sent to the provided email", "status": True},
-            status=status.HTTP_200_OK,
+                {"message": "OTP sent to the provided email", "status": True},
+                status=status.HTTP_200_OK,
         )
 
 
@@ -270,7 +268,7 @@ class VerifyOTPView(GenericAPIView):
         serializer = OTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = get_object_or_404(
-            get_user_model(), email=serializer.validated_data["email"]
+                get_user_model(), email=serializer.validated_data["email"]
         )
         otp_gen = OTPGenerator(user_id=user.id)
 
@@ -283,8 +281,8 @@ class VerifyOTPView(GenericAPIView):
             user.save()
 
             return Response(
-                {"message": "2FA successfully completed", "status": True},
-                status=status.HTTP_202_ACCEPTED,
+                    {"message": "2FA successfully completed", "status": True},
+                    status=status.HTTP_202_ACCEPTED,
             )
 
         return Response({"message": "Invalid otp"}, status=status.HTTP_403_FORBIDDEN)
@@ -308,8 +306,8 @@ class OTPChangePasswordView(GenericAPIView):
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return Response(
-                {"message": "Account not found", "status": "failed"},
-                status=status.HTTP_404_NOT_FOUND,
+                    {"message": "Account not found", "status": "failed"},
+                    status=status.HTTP_404_NOT_FOUND,
             )
 
         otp_gen = OTPGenerator(user_id=user.id)
@@ -317,27 +315,27 @@ class OTPChangePasswordView(GenericAPIView):
         check = otp_gen.check_otp(str(code))
         if not check:
             return Response(
-                {
-                    "message": "Code has expired or Incorrect. Request for another",
-                    "status": "failed",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+                    {
+                        "message": "Code has expired or Incorrect. Request for another",
+                        "status": "failed",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
             )
 
         if user.check_password(password):
             return Response(
-                {
-                    "message": "New password cannot be same as old password",
-                    "status": "failed",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+                    {
+                        "message": "New password cannot be same as old password",
+                        "status": "failed",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
             )
 
         user.set_password(password)
         user.save()
         return Response(
-            {"message": "Password updated successfully", "status": "success"},
-            status=status.HTTP_200_OK,
+                {"message": "Password updated successfully", "status": "success"},
+                status=status.HTTP_200_OK,
         )
 
 
@@ -360,14 +358,14 @@ class ChangePasswordView(GenericAPIView):
             password_validation.validate_password(password, request.user)
         except Exception as e:
             return Response(
-                {"message": e, "status": False}, status=status.HTTP_403_FORBIDDEN
+                    {"message": e, "status": False}, status=status.HTTP_403_FORBIDDEN
             )
 
         request.user.set_password(password)
         request.user.save()
         return Response(
-            {"message": "Password updated successfully", "status": True},
-            status=status.HTTP_200_OK,
+                {"message": "Password updated successfully", "status": True},
+                status=status.HTTP_200_OK,
         )
 
 
@@ -435,3 +433,21 @@ class UserSettingsView(GenericAPIView):
         serializer = self.serializer_class(instance, request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ResendEmailVerificationView(GenericAPIView):
+    serializer_class = ResendEmailVerificationSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = request.data.get('email')
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"message": "Account not found", "status": "failed"}, status=status.HTTP_404_NOT_FOUND)
+        if user.is_verified:
+            return Response({"message": "Account already verified. Log in", "status": "success"},
+                            status=status.HTTP_200_OK)
+        return Response({"message": "Verification code sent successfully", "status": "success"},
+                        status=status.HTTP_200_OK)
