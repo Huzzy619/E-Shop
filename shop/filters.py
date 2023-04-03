@@ -8,6 +8,6 @@ class ProductFilter(FilterSet):
         model = Product
         fields = {
             'collection_id': ['exact'],
-            'colors__name': ['exact'],
-            'sizes__size': ['exact']
+            # 'colors__name': ['exact'],
+            # 'sizes__size': ['exact']
         }

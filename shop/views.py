@@ -60,7 +60,7 @@ class CollectionViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
 
 class ProductViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
-    queryset = Product.objects.prefetch_related("colors", "sizes", "images").all()
+    queryset = Product.objects.prefetch_related("images").all()
     serializer_class = shop_serializer.ProductSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
@@ -70,8 +70,8 @@ class ProductViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
         "title",
         "description",
         "collection__name",
-        "colors__name",
-        "sizes__size",
+        # "colors__name",
+        # "sizes__size",
     ]
     ordering_fields = ["unit_price", "last_update", "category"]
 

@@ -46,7 +46,7 @@ class Product(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     unit_price = models.DecimalField(
-            max_digits=6, decimal_places=2, validators=[MinValueValidator(1)]
+            max_digits=6, decimal_places=2
     )
     inventory = models.IntegerField(validators=[MinValueValidator(0)])
     date_posted = models.DateTimeField(auto_now_add=True)
@@ -55,8 +55,8 @@ class Product(models.Model):
             Collection, on_delete=models.PROTECT, related_name="products"
     )
     likes = GenericRelation(Like)
-    colors = models.ManyToManyField(Color, blank=True)
-    sizes = models.ManyToManyField(Size, blank=True)
+    # colors = models.ManyToManyField(Color, blank=True)
+    # sizes = models.ManyToManyField(Size, blank=True)
     is_digital = models.BooleanField(default=False)
     url = models.URLField(max_length=500, null=True, blank=True)
 
@@ -91,16 +91,16 @@ class ProductImage(models.Model):
             Product, on_delete=models.CASCADE, related_name="images"
     )
     image = models.ImageField(upload_to="store/images", validators=[validate_file_size])
-    colors = models.ManyToManyField(Color, blank=True)
-    sizes = models.ManyToManyField(Size, blank=True)
+    # colors = models.ManyToManyField(Color, blank=True)
+    # sizes = models.ManyToManyField(Size, blank=True)
 
 
 class SizeInventory(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="size_inventory")
     size = models.ForeignKey(Size, on_delete=models.CASCADE, related_name="product_size")
-    quantity = models.IntegerField(default=0)
+    quantity = models.IntegerField(default=0, blank=True)
     unit_price = models.DecimalField(
-            max_digits=6, decimal_places=2, validators=[MinValueValidator(1)]
+            max_digits=6, decimal_places=2, blank=True, null=True
     )
 
     class Meta:
@@ -123,9 +123,9 @@ class SizeInventory(models.Model):
 class ColorInventory(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="color_inventory")
     color = models.ForeignKey(Color, on_delete=models.CASCADE, related_name="product_color")
-    quantity = models.IntegerField(default=0)
+    quantity = models.IntegerField(default=0, blank=True)
     unit_price = models.DecimalField(
-            max_digits=6, decimal_places=2, validators=[MinValueValidator(1)]
+            max_digits=6, decimal_places=2, blank=True, null=True
     )
 
     class Meta:
@@ -225,9 +225,13 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
+    # size = models.ForeignKey(Size, related_name="cartitems", on_delete=models.CASCADE)
+    # color = models.ForeignKey(
+    #     Color, related_name="cartitems", on_delete=models.CASCADE
+    # )
 
-    class Meta:
-        unique_together = [["cart", "product"]]
+    # class Meta:
+    #     unique_together = [["cart", "product"]]
 
 
 class Review(models.Model):
