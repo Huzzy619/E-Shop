@@ -105,10 +105,10 @@ class ProductSizeColorInventory(models.Model):
         verbose_name_plural = "Product Size & Inventories"
 
     def __str__(self):
-        return f"{self.product.name}---{self.size}-----{self.quantity}"
+        return self.product.title
 
     def clean(self):
-        total_quantity = self.product.productsizeinventory_set.aggregate(
+        total_quantity = self.product.productsizecolorinventory_set.aggregate(
                 total_quantity=models.Sum('quantity'))['total_quantity']
         if total_quantity + self.quantity > self.product.inventory:
             raise ValidationError(

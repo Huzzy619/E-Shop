@@ -134,4 +134,4 @@ dmypy.json
 playground/
 general.log
 media/store/
-.idea/
+.idea/workspace.xml

@@ -262,15 +262,12 @@ class OTPChangePasswordView(GenericAPIView):
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return Response({"message": "Account not found", "status": "failed"}, status=status.HTTP_404_NOT_FOUND)
-        otp = user.otp.first()
-        if otp is None or otp.code is None:
-            return Response({"message": "No OTP found for this account", "status": "failed"},
-                            status=status.HTTP_400_BAD_REQUEST)
-        elif otp.code != code:
-            return Response({"message": "Code is not correct", "status": "failed"}, status=status.HTTP_400_BAD_REQUEST)
-        elif otp.expired:
-            otp.delete()
-            return Response({"message": "Code has expired. Request for another", "status": "failed"},
+        
+        otp_gen = OTPGenerator(user_id=user.id)
+
+        check = otp_gen.check_otp(str(code))
+        if not check:
+            return Response({"message": "Code has expired or Incorrect. Request for another", "status": "failed"},
                             status=status.HTTP_400_BAD_REQUEST)
 
         if user.check_password(password):
