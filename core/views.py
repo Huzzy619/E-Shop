@@ -72,6 +72,7 @@ class ProfileView(GenericAPIView):
                 user.save()
 
         data = serializer.data
+        data["email"] = request.user.email
         data["status"] = True
         return Response(data, status=status.HTTP_200_OK)
 
