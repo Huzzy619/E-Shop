@@ -70,7 +70,7 @@ class ProductViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
         "title",
         "description",
         "collection__name",
-        "colors__color",
+        "colors__name",
         "sizes__size",
     ]
     ordering_fields = ["unit_price", "last_update", "category"]
