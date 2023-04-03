@@ -208,6 +208,8 @@ class OrderItem(models.Model):
     )
     quantity = models.PositiveSmallIntegerField()
     unit_price = models.DecimalField(max_digits=6, decimal_places=2)
+    size = models.CharField(max_length=100, null=True, blank=True)
+    color = models.CharField( max_length=100, null=True, blank=True)
 
 
 class BillingAddress(models.Model):
@@ -225,10 +227,8 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
-    # size = models.ForeignKey(Size, related_name="cartitems", on_delete=models.CASCADE)
-    # color = models.ForeignKey(
-    #     Color, related_name="cartitems", on_delete=models.CASCADE
-    # )
+    size = models.CharField(max_length=100, null=True, blank=True)
+    color = models.CharField( max_length=100, null=True, blank=True)
 
     # class Meta:
     #     unique_together = [["cart", "product"]]
