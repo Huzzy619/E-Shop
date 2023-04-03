@@ -116,3 +116,9 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline]
     list_display = ["id", "placed_at", "customer"]
     search_fields = ["payment_status", "customer"]
+
+@admin.register(models.Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ["type", "title", "general"]
+    list_filter = ["type", "title", "general"]
+    filter_horizontal = ("users",)

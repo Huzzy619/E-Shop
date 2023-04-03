@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from shop.models import BillingAddress, Order
+from shop.models import BillingAddress, Order, Notification
 
 from .models import PaymentMethod
 from .serializers import MakePaymentSerializer, PaymentCardSerializer
@@ -136,10 +136,17 @@ class MakePayment(APIView):
                 order.save()
 
                 # Reduce quantities from inventory
+                title = ""
                 for item in order.items.all():
                     item.product.inventory -= item.quantity
 
                     item.product.save()
+                    title += item.product.title
+                
+                
+                notification = Notification.objects.create(
+                    type="ACTIVITY", title=title)
+                notification.users.add(user)
 
                 return Response(
                     {

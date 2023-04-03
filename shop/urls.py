@@ -20,6 +20,7 @@ carts_router.register('items', views.CartItemViewSet, basename='cart-items')
 # URLConf
 urlpatterns = [
     path('products/favorite/mark', views.LikeProductView.as_view()), 
-    path('track/order/<str:order_id>', views.TrackOrderView.as_view())
+    path('track/order/<str:order_id>', views.TrackOrderView.as_view()), 
+    path("notifications/", views.Notifications.as_view()),
 ]
 urlpatterns += router.urls + products_router.urls + carts_router.urls

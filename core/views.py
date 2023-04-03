@@ -28,7 +28,7 @@ from .serializers import (
     RegisterSerializer,
     ResendEmailVerificationSerializer, UserSettingsSerializer,
 )
-
+from shop.models import Notification
 
 class ProfileView(GenericAPIView):
     """
@@ -282,9 +282,13 @@ class VerifyOTPView(GenericAPIView):
 
         if check:
             # Mark user as verified
+            if not user.is_verified:
+                user.is_verified = True
+                user.save()
 
-            user.is_verified = True
-            user.save()
+                notification = Notification.objects.create(
+                    type="ACTIVITY", title="Account setup Successful", desc = "Your account has been created and verified successfully")
+                notification.users.add(user)
 
             return Response(
                     {"message": "2FA successfully completed", "status": True},

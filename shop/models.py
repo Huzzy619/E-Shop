@@ -17,6 +17,8 @@ class Color(models.Model):
     hex_code = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self) -> str:
+        if not self.name:
+            return "unnamed"
         return self.name
 
 
@@ -237,3 +239,22 @@ class Review(models.Model):
     )
     description = models.TextField()
     date = models.DateField(auto_now_add=True)
+
+
+class Notification(models.Model):
+    NOTIFICATION_TYPE_CHOICES = (
+    ("OFFER", "OFFER"),
+    ("FEED", "FEED"),
+    ("ACTIVITY", "ACTIVITY"),
+)
+    id = models.UUIDField(default=uuid4, unique=True, editable=False, primary_key=True)
+    type = models.CharField(max_length=200, choices=NOTIFICATION_TYPE_CHOICES)
+    title = models.CharField(max_length=200, null=True)
+    desc = models.CharField(max_length=200, null=True)
+    general = models.BooleanField(default=False)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Type: {self.type}----Title: {self.title}"

@@ -33,8 +33,24 @@ from .models import (
     Product,
     ProductImage,
     Review,
-    TrackOrder,
+    TrackOrder, Notification
 )
+
+class Notifications(GenericAPIView):
+    """
+    Feed, Offers, Activity Notification
+    """
+    permission_classes = (IsAuthenticated,)
+
+    
+    def get(self, request):
+        user = request.user
+        notifications = Notification.objects.filter(users__in=[user]).values(
+            "type", "title", "desc", "created_at"
+        )
+        return Response(
+            {"message": "Notified", "data": notifications, "status": True}, status=200
+        )
 
 
 class CollectionViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -221,6 +237,11 @@ class TrackOrderView(GenericAPIView):
             track_obj.in_transit_date = datetime.now()
         elif _status == "delivered":
             track_obj.date_delivered = datetime.now()
+
+            notification = Notification.objects.create(
+                    type="ACTIVITY", title="Order Delivery", desc = "Your order has been delivered")
+            notification.users.add(order.customer)
+
 
         track_obj.status = _status
 

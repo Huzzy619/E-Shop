@@ -310,6 +310,7 @@ JAZZMIN_SETTINGS = {
         "shop.review": "fas fa-star",
         "shop.size": "fas fa-expand",
         "shop.trackorder": "fas fa-map-marker",
+        "shop.notification": "fas fa-bell",
     },
     # Icons that are used when one is not manually specified
     "default_icon_parents": "fas fa-chevron-circle-right",
