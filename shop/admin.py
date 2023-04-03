@@ -35,14 +35,14 @@ class ProductImageInline(admin.TabularInline):
         return ""
 
 
-class ProductColorInventoryInline(admin.TabularInline):
-    model = models.ProductColorInventory
+class ColorInventoryInline(admin.TabularInline):
+    model = models.ColorInventory
     min_num = 1
     extra = 1
 
 
-class ProductSizeInventoryInline(admin.TabularInline):
-    model = models.ProductSizeInventory
+class SizeInventoryInline(admin.TabularInline):
+    model = models.SizeInventory
     min_num = 1
     extra = 1
 
