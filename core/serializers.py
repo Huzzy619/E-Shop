@@ -59,6 +59,7 @@ class OTPSerializer(serializers.Serializer):
 class OTPChangePasswordSerializer(serializers.Serializer):
     otp = serializers.IntegerField()
     password = serializers.CharField(max_length=50, min_length=6, write_only=True)
+    email = serializers.EmailField()
 
     def validate(self, attrs):
         otp = attrs.get('otp', '')

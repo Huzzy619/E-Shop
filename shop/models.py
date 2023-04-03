@@ -126,7 +126,7 @@ class ProductColorInventory(models.Model):
     )
 
     class Meta:
-        verbose_name_plural = "Product Size & Inventories"
+        verbose_name_plural = "Product Color & Inventories"
 
     def __str__(self):
         return self.product.title

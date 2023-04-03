@@ -26,6 +26,8 @@ class ProductImageInline(admin.TabularInline):
     readonly_fields = ["thumbnail"]
     min_num = 1
     max_num = 6
+    extra = 1
+
 
     def thumbnail(self, instance):
         if instance.image.name != "":
@@ -36,18 +38,21 @@ class ProductImageInline(admin.TabularInline):
 class ProductColorInventoryInline(admin.TabularInline):
     model = models.ProductColorInventory
     min_num = 1
+    extra = 1
 
 
 class ProductSizeInventoryInline(admin.TabularInline):
     model = models.ProductSizeInventory
     min_num = 1
+    extra = 1
+
 
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ["collection"]
     actions = ["clear_inventory"]
-    inlines = [ProductImageInline, ProductColorInventoryInline, ProductSizeInventoryInline]
+    inlines = [ProductImageInline,  ProductSizeInventoryInline, ProductColorInventoryInline]
     list_display = ["title", "unit_price", "inventory_status", "collection_title"]
     list_editable = ["unit_price"]
     list_filter = ["collection", "last_update", InventoryFilter]
@@ -86,7 +91,7 @@ class CollectionAdmin(admin.ModelAdmin):
     @admin.display(ordering="products_count")
     def products_count(self, collection):
         url = (
-                reverse("admin:store_product_changelist")
+                reverse("admin:shop_product_changelist")
                 + "?"
                 + urlencode({"collection__id": str(collection.id)})
         )

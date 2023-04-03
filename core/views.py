@@ -14,7 +14,7 @@ from rest_framework_simplejwt.serializers import (
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from core.signals import complete_order_signal, reset_password_signal
+from core.signals import complete_order_signal, reset_password_signal, resend_email_verification_code
 from .models import Profile, User, UserSettings
 from .otp import OTPGenerator
 from .serializers import (
@@ -239,6 +239,11 @@ class GetOTPView(GenericAPIView):
             complete_order_signal.send(
                     __class__, code=otp, name=user.username, email=user.email
             )
+        elif "email-verify-code" in request.get_full_path():
+            resend_email_verification_code.send(
+                    __class__, code=otp, name=user.username, email=user.email
+            )
+
         else:
             reset_password_signal.send(
                     __class__, code=otp, name=user.username, email=user.email
@@ -299,7 +304,7 @@ class OTPChangePasswordView(GenericAPIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = request.user.email
+        email = serializer.validated_data["email"]
         code = serializer.validated_data["code"]
         password = serializer.validated_data["password"]
         try:

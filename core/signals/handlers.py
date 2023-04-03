@@ -6,8 +6,13 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from core.signals import complete_order_signal, resend_email_verification_code, reset_password_signal
+from core.signals import (
+    complete_order_signal,
+    resend_email_verification_code,
+    reset_password_signal,
+)
 from utils.email_backend import send_email
+
 from ..models import Profile, UserSettings
 from ..otp import OTPGenerator
 
@@ -22,11 +27,11 @@ def create_user_profile_and_settings(instance, created, **kwargs):
         code = OTPGenerator(user_id=instance.id).get_otp()
         stripe.Customer.create()
         send_email(
-                subject="Complete your registration",
-                message="Registration code",
-                recipients=[instance.email],
-                template="email/registration.html",
-                context={"code": code, "name": instance.username},
+            subject="Complete your registration",
+            message="Registration code",
+            recipients=[instance.email],
+            template="email/registration.html",
+            context={"code": code, "name": instance.username},
         )
 
         customer = stripe.Customer.create(email=instance.email)
@@ -38,31 +43,31 @@ def create_user_profile_and_settings(instance, created, **kwargs):
 @receiver(reset_password_signal)
 def send_password_reset_email(**kwargs):
     send_email(
-            subject="Reset Your Password",
-            message="Password Reset",
-            recipients=[kwargs["email"]],
-            template="email/reset_password.html",
-            context={"code": kwargs["code"], "name": kwargs["name"]},
+        subject="Reset Your Password",
+        message="Password Reset",
+        recipients=[kwargs["email"]],
+        template="email/reset_password.html",
+        context={"code": kwargs["code"], "name": kwargs["name"]},
     )
 
 
 @receiver(complete_order_signal)
 def send_complete_order_email(**kwargs):
     send_email(
-            subject="Complete Order",
-            message="Code to Complete order",
-            recipients=[kwargs["email"]],
-            template="email/complete_order.html",
-            context={"code": kwargs["code"], "name": kwargs["name"]},
+        subject="Complete Order",
+        message="Code to Complete order",
+        recipients=[kwargs["email"]],
+        template="email/complete_order.html",
+        context={"code": kwargs["code"], "name": kwargs["name"]},
     )
 
 
 @receiver(resend_email_verification_code)
 def send_email_verify_code(**kwargs):
     send_email(
-            subject="Email Verification Code",
-            message="Verification Code",
-            recipients=[kwargs["email"]],
-            template="email/email_verification.html",
-            context={"code": kwargs["code"], "name": kwargs["name"]},
+        subject="Email Verification Code",
+        message="Verification Code",
+        recipients=[kwargs["email"]],
+        template="email/email_verification.html",
+        context={"code": kwargs["code"], "name": kwargs["name"]},
     )
