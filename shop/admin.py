@@ -28,7 +28,6 @@ class ProductImageInline(admin.TabularInline):
     max_num = 6
     extra = 1
 
-
     def thumbnail(self, instance):
         if instance.image.name != "":
             return format_html(f'<img src="{instance.image.url}" class="thumbnail" />')
@@ -47,12 +46,11 @@ class SizeInventoryInline(admin.TabularInline):
     extra = 1
 
 
-
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ["collection"]
     actions = ["clear_inventory"]
-    inlines = [ProductImageInline]
+    inlines = [ProductImageInline, SizeInventoryInline]
     list_display = ["title", "unit_price", "inventory_status", "collection_title"]
     list_editable = ["unit_price"]
     list_filter = ["collection", "last_update", InventoryFilter]
@@ -116,6 +114,7 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline]
     list_display = ["id", "placed_at", "customer"]
     search_fields = ["payment_status", "customer"]
+
 
 @admin.register(models.Notification)
 class NotificationAdmin(admin.ModelAdmin):

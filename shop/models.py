@@ -97,7 +97,7 @@ class ProductImage(models.Model):
 
 class SizeInventory(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="size_inventory")
-    size = models.ForeignKey(Size, on_delete=models.CASCADE, related_name="product_size")
+    size = models.CharField(max_length=10, null=True)
     quantity = models.IntegerField(default=0)
     unit_price = models.DecimalField(
             max_digits=6, decimal_places=2, validators=[MinValueValidator(1)]
