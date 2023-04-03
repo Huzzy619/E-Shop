@@ -109,7 +109,7 @@ class ProductSizeColorInventory(models.Model):
 
     def clean(self):
         total_quantity = self.product.product_size_color_inventory.aggregate(
-                total_quantity=models.Sum('quantity'))['total_quantity']
+                total_quantity=models.Sum('quantity'))['total_quantity'] or 0
         if total_quantity + self.quantity > self.product.inventory:
             raise ValidationError(
                     "Total quantity of this product size inventory exceeds the amount in stock.")
