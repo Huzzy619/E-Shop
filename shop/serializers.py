@@ -17,6 +17,8 @@ from .models import (
     ProductImage,
     Review,
     TrackOrder,
+    SizeInventory, 
+    ColorInventory,
 )
 
 Customer = get_user_model()
@@ -37,10 +39,28 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ["id", "image"]
 
     
+class ProductColorInventorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ColorInventory
+        fields = ["id", "quantity", "unit_price" ]
+        # depth = 1
+
+class ProductSizeInventorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SizeInventory
+        fields = ["id", "size","quantity", "unit_price" ]
+        # depth = 1
 
 
 class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
+    # colors = ProductColorInventorySerializer(many=True, read_only=True)
+    # sizes = ProductSizeInventorySerializer(many=True, read_only = True)
+    sizes = serializers.SerializerMethodField()
+    colors = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Product
@@ -48,16 +68,37 @@ class ProductSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "description",
+            "is_digital",
             "inventory",
             "unit_price",
             "collection",
-            "images",
             "rating",
             "total_review",
-            # "colors",
-            # "sizes",
+            "images",
+            "colors",
+            "sizes",
+            
         ]
         depth = 1
+    
+    def get_sizes(self, product:Product):
+        values = product.size_inventory.values("unit_price", "size__size", "quantity")
+        
+        if values:
+
+            return values
+        return []
+    
+    def get_colors(self, product:Product):
+        values = product.color_inventory.values("unit_price", "color__name","color__hex_code", "quantity")
+        
+        if values:
+
+            return values
+
+        return []
+    
+
 
 
 class LikeProductSerializer(LikeSerializer):
@@ -137,7 +178,7 @@ class AddCartItemSerializer(serializers.Serializer):
         return value
     
     def validate(self, attrs):
-        product  = Product.objects.filter(pk = attrs['product_id'])
+        Product.objects.filter(pk = attrs['product_id'])
         if attrs['size']:
             
             pass

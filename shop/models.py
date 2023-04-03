@@ -109,15 +109,15 @@ class SizeInventory(models.Model):
     def __str__(self):
         return self.product.title
 
-    def clean(self):
-        total_quantity = self.product.size_inventory.aggregate(
-                total_quantity=models.Sum('quantity'))['total_quantity'] or 0
-        if total_quantity + self.quantity > self.product.inventory:
-            raise ValidationError(
-                    "Total quantity of this product size inventory exceeds the amount in stock.")
-        if self.quantity == 0:
-            raise ValidationError(
-                    "This product size is no more in stock.")
+    # def clean(self):
+    #     total_quantity = self.product.size_inventory.aggregate(
+    #             total_quantity=models.Sum('quantity'))['total_quantity'] or 0
+    #     if total_quantity + self.quantity > self.product.inventory:
+    #         raise ValidationError(
+    #                 "Total quantity of this product size inventory exceeds the amount in stock.")
+    #     if self.quantity == 0:
+    #         raise ValidationError(
+    #                 "This product size is no more in stock.")
 
 
 class ColorInventory(models.Model):
@@ -129,20 +129,20 @@ class ColorInventory(models.Model):
     )
 
     class Meta:
-        verbose_name_plural = "Product Color & Inventories"
+        verbose_name_plural = "Product Color & Inventories" 
 
     def __str__(self):
         return self.product.title
 
-    def clean(self):
-        total_quantity = self.product.color_inventory.aggregate(
-                total_quantity=models.Sum('quantity'))['total_quantity'] or 0
-        if total_quantity + self.quantity > self.product.inventory:
-            raise ValidationError(
-                    "Total quantity of this product size inventory exceeds the amount in stock.")
-        if self.quantity == 0:
-            raise ValidationError(
-                    "This product size is no more in stock.")
+    # def clean(self):
+        # total_quantity = self.product.color_inventory.aggregate(
+        #         total_quantity=models.Sum('quantity'))['total_quantity'] or 0
+        # if total_quantity + self.quantity > self.product.inventory:
+        #     raise ValidationError(
+        #             "Total quantity of this product size inventory exceeds the amount in stock.")
+        # if self.quantity == 0:
+        #     raise ValidationError(
+        #             "This product size is no more in stock.")
 
 
 class Order(models.Model):

@@ -34,29 +34,28 @@ class ProductImageInline(admin.TabularInline):
         return ""
 
 
-class ColorInventoryInline(admin.TabularInline):
-    model = models.ColorInventory
-    # min_num = 1
-    extra = 1
 
 
 class SizeInventoryInline(admin.TabularInline):
     model = models.SizeInventory
-    # min_num = 1
     extra = 1
 
+class ColorInventoryInline(admin.TabularInline):
+    model = models.ColorInventory
+    extra = 1
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ["collection"]
     actions = ["clear_inventory"]
-    inlines = [ProductImageInline]
+    inlines = [ProductImageInline,ColorInventoryInline, SizeInventoryInline]
     list_display = ["title", "unit_price", "inventory_status", "collection_title"]
     list_editable = ["unit_price"]
     list_filter = ["collection", "last_update", InventoryFilter]
     list_per_page = 10
     list_select_related = ["collection"]
     search_fields = ["title"]
+    save_on_top = True
 
     def collection_title(self, product):
         return product.collection.title
@@ -78,6 +77,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     class Media:
         css = {"all": ["styles.css"]}
+
 
 
 @admin.register(models.Collection)
