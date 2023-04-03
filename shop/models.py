@@ -108,7 +108,7 @@ class ProductSizeColorInventory(models.Model):
         return self.product.title
 
     def clean(self):
-        total_quantity = self.product.productsizecolorinventory_set.aggregate(
+        total_quantity = self.product.product_size_color_inventory.aggregate(
                 total_quantity=models.Sum('quantity'))['total_quantity']
         if total_quantity + self.quantity > self.product.inventory:
             raise ValidationError(
