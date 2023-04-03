@@ -28,7 +28,6 @@ class ProductImageInline(admin.TabularInline):
     max_num = 6
     extra = 1
 
-
     def thumbnail(self, instance):
         if instance.image.name != "":
             return format_html(f'<img src="{instance.image.url}" class="thumbnail" />')
@@ -45,7 +44,6 @@ class SizeInventoryInline(admin.TabularInline):
     model = models.SizeInventory
     # min_num = 1
     extra = 1
-
 
 
 @admin.register(models.Product)
@@ -116,6 +114,7 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline]
     list_display = ["id", "placed_at", "customer"]
     search_fields = ["payment_status", "customer"]
+
 
 @admin.register(models.Notification)
 class NotificationAdmin(admin.ModelAdmin):
