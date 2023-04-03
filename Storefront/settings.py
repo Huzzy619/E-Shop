@@ -307,8 +307,6 @@ JAZZMIN_SETTINGS = {
         "shop.orderitem": "fas fa-shopping-cart",
         "shop.product": "fas fa-shopping-basket",
         "shop.productimage": "fas fa-file-image",
-        "shop.productsizeinventory": "fas fa-box",
-        "shop.productcolorinventory": "fas fa-box",
         "shop.review": "fas fa-star",
         "shop.size": "fas fa-expand",
         "shop.trackorder": "fas fa-map-marker",

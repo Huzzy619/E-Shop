@@ -33,13 +33,13 @@ class ProductImageInline(admin.TabularInline):
         return ""
 
 
-class ProductColorInventoryInline(admin.TabularInline):
-    model = models.ProductColorInventory
+class ColorInventoryInline(admin.TabularInline):
+    model = models.ColorInventory
     min_num = 1
 
 
-class ProductSizeInventoryInline(admin.TabularInline):
-    model = models.ProductSizeInventory
+class SizeInventoryInline(admin.TabularInline):
+    model = models.SizeInventory
     min_num = 1
 
 
@@ -47,7 +47,7 @@ class ProductSizeInventoryInline(admin.TabularInline):
 class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ["collection"]
     actions = ["clear_inventory"]
-    inlines = [ProductImageInline, ProductColorInventoryInline, ProductSizeInventoryInline]
+    inlines = [ProductImageInline, SizeInventoryInline, ColorInventoryInline]
     list_display = ["title", "unit_price", "inventory_status", "collection_title"]
     list_editable = ["unit_price"]
     list_filter = ["collection", "last_update", InventoryFilter]

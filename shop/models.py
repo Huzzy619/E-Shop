@@ -92,8 +92,8 @@ class ProductImage(models.Model):
     sizes = models.ManyToManyField(Size, blank=True)
 
 
-class ProductSizeInventory(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_size_inventory")
+class SizeInventory(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="size_inventory")
     size = models.ForeignKey(Size, on_delete=models.CASCADE, related_name="product_size")
     quantity = models.IntegerField(default=0)
     unit_price = models.DecimalField(
@@ -107,7 +107,7 @@ class ProductSizeInventory(models.Model):
         return self.product.title
 
     def clean(self):
-        total_quantity = self.product.product_size_inventory.aggregate(
+        total_quantity = self.product.size_inventory.aggregate(
                 total_quantity=models.Sum('quantity'))['total_quantity'] or 0
         if total_quantity + self.quantity > self.product.inventory:
             raise ValidationError(
@@ -117,8 +117,8 @@ class ProductSizeInventory(models.Model):
                     "This product size is no more in stock.")
 
 
-class ProductColorInventory(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_color_inventory")
+class ColorInventory(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="color_inventory")
     color = models.ForeignKey(Color, on_delete=models.CASCADE, related_name="product_color")
     quantity = models.IntegerField(default=0)
     unit_price = models.DecimalField(
@@ -132,7 +132,7 @@ class ProductColorInventory(models.Model):
         return self.product.title
 
     def clean(self):
-        total_quantity = self.product.product_color_inventory.aggregate(
+        total_quantity = self.product.color_inventory.aggregate(
                 total_quantity=models.Sum('quantity'))['total_quantity'] or 0
         if total_quantity + self.quantity > self.product.inventory:
             raise ValidationError(
