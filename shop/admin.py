@@ -33,11 +33,21 @@ class ProductImageInline(admin.TabularInline):
         return ""
 
 
+class ProductColorInventoryInline(admin.TabularInline):
+    model = models.ProductColorInventory
+    min_num = 1
+
+
+class ProductSizeInventoryInline(admin.TabularInline):
+    model = models.ProductSizeInventory
+    min_num = 1
+
+
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ["collection"]
     actions = ["clear_inventory"]
-    inlines = [ProductImageInline]
+    inlines = [ProductImageInline, ProductColorInventoryInline, ProductSizeInventoryInline]
     list_display = ["title", "unit_price", "inventory_status", "collection_title"]
     list_editable = ["unit_price"]
     list_filter = ["collection", "last_update", InventoryFilter]
@@ -58,9 +68,9 @@ class ProductAdmin(admin.ModelAdmin):
     def clear_inventory(self, request, queryset):
         updated_count = queryset.update(inventory=0)
         self.message_user(
-            request,
-            f"{updated_count} products were successfully updated.",
-            messages.ERROR,
+                request,
+                f"{updated_count} products were successfully updated.",
+                messages.ERROR,
         )
 
     class Media:
@@ -76,12 +86,12 @@ class CollectionAdmin(admin.ModelAdmin):
     @admin.display(ordering="products_count")
     def products_count(self, collection):
         url = (
-            reverse("admin:store_product_changelist")
-            + "?"
-            + urlencode({"collection__id": str(collection.id)})
+                reverse("admin:store_product_changelist")
+                + "?"
+                + urlencode({"collection__id": str(collection.id)})
         )
         return format_html(
-            '<a href="{}">{} Products</a>', url, collection.products_count
+                '<a href="{}">{} Products</a>', url, collection.products_count
         )
 
     def get_queryset(self, request):
@@ -101,10 +111,3 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline]
     list_display = ["id", "placed_at", "customer"]
     search_fields = ["payment_status", "customer"]
-
-
-@admin.register(models.ProductSizeColorInventory)
-class ProductSizeColorInventoryAdmin(admin.ModelAdmin):
-    list_display = ['product', 'color', 'size', 'quantity', 'unit_price']
-    list_filter = ["product", "unit_price", 'quantity']
-    list_per_page = 10
