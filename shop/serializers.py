@@ -39,25 +39,8 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ["id", "image"]
 
     
-class ProductColorInventorySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = ColorInventory
-        fields = ["id", "quantity", "unit_price" ]
-        # depth = 1
-
-class ProductSizeInventorySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = SizeInventory
-        fields = ["id", "size","quantity", "unit_price" ]
-        # depth = 1
-
-
-class ProductSerializer(serializers.ModelSerializer):
+class SingleProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
-    # colors = ProductColorInventorySerializer(many=True, read_only=True)
-    # sizes = ProductSizeInventorySerializer(many=True, read_only = True)
     sizes = serializers.SerializerMethodField()
     colors = serializers.SerializerMethodField()
 
@@ -90,16 +73,34 @@ class ProductSerializer(serializers.ModelSerializer):
         return []
     
     def get_colors(self, product:Product):
-        values = product.color_inventory.values("unit_price", "color__name","color__hex_code", "quantity")
+        values = product.color_inventory.values(
+            "unit_price", "color__name","color__hex_code", "quantity")
         
         if values:
 
             return values
 
         return []
-    
+
+class ProductSerializer(serializers.ModelSerializer):
+    images = ProductImageSerializer(many=True, read_only=True)
 
 
+    class Meta:
+        model = Product
+        fields = [
+            "id",
+            "title",
+            "description",
+            "is_digital",
+            "inventory",
+            "unit_price",
+            "collection",
+            "rating",
+            "total_review",
+            "images",
+            
+        ]
 
 class LikeProductSerializer(LikeSerializer):
     product_id = serializers.IntegerField(source="object_id")

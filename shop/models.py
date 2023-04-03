@@ -23,10 +23,10 @@ class Color(models.Model):
 
 
 class Size(models.Model):
-    size = models.IntegerField(null=True, blank=True)
+    size = models.CharField(max_length=20)
 
     def __str__(self) -> str:
-        return str(self.size)
+        return self.size
 
 
 class Collection(models.Model):
