@@ -178,11 +178,20 @@ class Order(models.Model):
 
     def get_total_price(self):
         return sum(
-                [item.quantity * item.product.unit_price for item in self.items.all()]
+                [item.quantity * item.unit_price for item in self.items.all()]
         )
 
     class Meta:
         permissions = [("cancel_order", "Can cancel order")]
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name="items")
+    product = models.ForeignKey(
+            Product, on_delete=models.PROTECT, related_name="orderitems"
+    )
+    quantity = models.PositiveSmallIntegerField()
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
+    size = models.CharField(max_length=100, null=True, blank=True)
+    color = models.CharField( max_length=100, null=True, blank=True)
 
 
 class TrackOrder(models.Model):
@@ -201,15 +210,6 @@ class TrackOrder(models.Model):
     date_delivered = models.DateTimeField(null=True, blank=True)
 
 
-class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name="items")
-    product = models.ForeignKey(
-            Product, on_delete=models.PROTECT, related_name="orderitems"
-    )
-    quantity = models.PositiveSmallIntegerField()
-    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
-    size = models.CharField(max_length=100, null=True, blank=True)
-    color = models.CharField( max_length=100, null=True, blank=True)
 
 
 class BillingAddress(models.Model):

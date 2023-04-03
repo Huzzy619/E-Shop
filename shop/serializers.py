@@ -297,7 +297,7 @@ class CreateOrderSerializer(serializers.Serializer):
                 OrderItem(
                     order=order,
                     product=item.product,
-                    unit_price=item.product.unit_price,
+                    unit_price=item.resolved_price,
                     quantity=item.quantity,
                     size = item.size,
                     color = item.color
