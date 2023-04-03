@@ -99,7 +99,7 @@ class SizeInventory(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="size_inventory")
     size = models.ForeignKey(Size, on_delete=models.CASCADE, related_name="product_size")
     quantity = models.IntegerField(default=0, blank=True)
-    unit_price = models.DecimalField(
+    extra_price = models.DecimalField(
             max_digits=6, decimal_places=2, blank=True, null=True
     )
 
@@ -124,7 +124,7 @@ class ColorInventory(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="color_inventory")
     color = models.ForeignKey(Color, on_delete=models.CASCADE, related_name="product_color")
     quantity = models.IntegerField(default=0, blank=True)
-    unit_price = models.DecimalField(
+    extra_price = models.DecimalField(
             max_digits=6, decimal_places=2, blank=True, null=True
     )
 
@@ -232,6 +232,30 @@ class CartItem(models.Model):
 
     # class Meta:
     #     unique_together = [["cart", "product"]]
+    @property
+    def resolved_price(self):
+        main_price = self.product.unit_price
+        colors_price =  []
+        sizes_price = []
+
+        colors = self.product.color_inventory.all()
+        if colors:
+            for item in colors:
+                if item.extra_price:
+                    colors_price.append(item.extra_price)
+        
+        sizes = self.product.size_inventory.all()
+        if sizes:
+            for item in sizes:
+                if item.extra_price:
+                    sizes_price.append(item.extra_price)
+        
+        total = main_price + sum(sizes_price) + sum(colors_price)
+
+        return total
+
+
+
 
 
 class Review(models.Model):

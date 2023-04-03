@@ -40,10 +40,14 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ["id", "image"]
 
 
-class SingleProductSerializer(serializers.ModelSerializer):
-    images = ProductImageSerializer(many=True, read_only=True)
+
+
+
+
+class ProductSerializer(serializers.ModelSerializer):
     sizes = serializers.SerializerMethodField()
     colors = serializers.SerializerMethodField()
+    images = ProductImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
@@ -61,10 +65,9 @@ class SingleProductSerializer(serializers.ModelSerializer):
             "colors",
             "sizes",
         ]
-        depth = 1
 
     def get_sizes(self, product: Product):
-        values = product.size_inventory.values("unit_price", "size__size", "quantity")
+        values = product.size_inventory.values("extra_price", "size__size", "quantity")
 
         if values:
             return values
@@ -72,33 +75,13 @@ class SingleProductSerializer(serializers.ModelSerializer):
 
     def get_colors(self, product: Product):
         values = product.color_inventory.values(
-            "unit_price", "color__name", "color__hex_code", "quantity"
+            "extra_price", "color__name", "color__hex_code", "quantity"
         )
 
         if values:
             return values
 
         return []
-
-
-class ProductSerializer(serializers.ModelSerializer):
-    images = ProductImageSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Product
-        fields = [
-            "id",
-            "title",
-            "description",
-            "is_digital",
-            "inventory",
-            "unit_price",
-            "collection",
-            "rating",
-            "total_review",
-            "images",
-        ]
-
 
 class LikeProductSerializer(LikeSerializer):
     product_id = serializers.IntegerField(source="object_id")
@@ -142,7 +125,7 @@ class CartItemSerializer(serializers.ModelSerializer):
     total_price = serializers.SerializerMethodField()
 
     def get_total_price(self, cart_item: CartItem):
-        return cart_item.quantity * cart_item.product.unit_price
+        return cart_item.quantity * cart_item.resolved_price
 
     class Meta:
         model = CartItem
@@ -156,7 +139,7 @@ class CartSerializer(serializers.ModelSerializer):
 
     def get_total_price(self, cart):
         return sum(
-            [item.quantity * item.product.unit_price for item in cart.items.all()]
+            [item.quantity * item.resolved_price for item in cart.items.all()]
         )
 
     class Meta:
@@ -240,7 +223,7 @@ class AddCartItemSerializer(serializers.ModelSerializer):
 class UpdateCartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
-        fields = ["quantity", "size", "color"]
+        fields = ["quantity"]
     
 
 

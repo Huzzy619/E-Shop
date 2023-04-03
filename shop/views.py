@@ -78,14 +78,7 @@ class ProductViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     def get_serializer_context(self):
         return {"request": self.request}
     
-    def get_serializer_class(self):
-        # Checking if the endpoint been accessed is list or retrieve
-        path = self.request.get_full_path(force_append_slash=True)
-        url_split = path.split("/")
-        if url_split[-2].isdigit():
-            return shop_serializer.SingleProductSerializer
-
-        return super().get_serializer_class()
+    
 
     @action(
         detail=False,
