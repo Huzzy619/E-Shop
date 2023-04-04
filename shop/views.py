@@ -90,7 +90,7 @@ class ProductViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
         serializer = self.serializer_class(products, many=True)
 
         return Response(
-            data={"products": serializer.data, "status": True},
+            data={"results": serializer.data, "status": True},
             status=status.HTTP_200_OK,
         )
 
