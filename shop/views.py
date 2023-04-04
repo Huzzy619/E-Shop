@@ -117,7 +117,7 @@ class LikeProductView(LikeView):
         
         product_instance  =Product.objects.get(id = request.data['product_id'])
         data = shop_serializer.ProductSerializer(product_instance).data
-        return Response({"status": True, "message": message, "data":data}, status=status.HTTP_200_OK)
+        return Response({"status": True, "message": message, "results":data}, status=status.HTTP_200_OK)
 
 
 class ReviewViewSet(GenericViewSet):
