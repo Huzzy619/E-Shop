@@ -238,13 +238,13 @@ class CartItem(models.Model):
         colors_price =  []
         sizes_price = []
 
-        colors = self.product.color_inventory.all()
+        colors = self.product.color_inventory.filter(color__name = self.color)
         if colors:
             for item in colors:
                 if item.extra_price:
                     colors_price.append(item.extra_price)
         
-        sizes = self.product.size_inventory.all()
+        sizes = self.product.size_inventory.filter(size__size = self.size)
         if sizes:
             for item in sizes:
                 if item.extra_price:
