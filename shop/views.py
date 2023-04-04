@@ -90,7 +90,7 @@ class ProductViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
         serializer = self.serializer_class(products, many=True)
 
         return Response(
-            data={"products": serializer.data, "status": True},
+            data={"results": serializer.data, "status": True},
             status=status.HTTP_200_OK,
         )
 
@@ -117,7 +117,7 @@ class LikeProductView(LikeView):
         
         product_instance  =Product.objects.get(id = request.data['product_id'])
         data = shop_serializer.ProductSerializer(product_instance).data
-        return Response({"status": True, "message": message, "data":data}, status=status.HTTP_200_OK)
+        return Response({"status": True, "message": message, "results":data}, status=status.HTTP_200_OK)
 
 
 class ReviewViewSet(GenericViewSet):

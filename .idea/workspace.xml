@@ -29,6 +29,7 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="2NpyB543Fxn73ulTz0IjNlzQd42" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -40,7 +41,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/s13g/Projects/E-Shop&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/s13g/Projects/mk_store&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -93,6 +94,9 @@
       <workItem from="1680432428264" duration="6392000" />
       <workItem from="1680460066777" duration="53000" />
       <workItem from="1680474088952" duration="12159000" />
+      <workItem from="1680494207993" duration="9882000" />
+      <workItem from="1680553380423" duration="4548000" />
+      <workItem from="1680590301018" duration="357000" />
     </task>
     <servers />
   </component>
