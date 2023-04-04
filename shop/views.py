@@ -114,7 +114,10 @@ class LikeProductView(LikeView):
         message = "Product marked as favorite"
         if self.unlike:
             message = "Product removed from favorite"
-        return Response({"status": True, "message": message}, status=status.HTTP_200_OK)
+        
+        product_instance  =Product.objects.get(id = request.data['product_id'])
+        data = shop_serializer.ProductSerializer(product_instance).data
+        return Response({"status": True, "message": message, "data":data}, status=status.HTTP_200_OK)
 
 
 class ReviewViewSet(GenericViewSet):
