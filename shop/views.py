@@ -114,7 +114,7 @@ class LikeProductView(LikeView):
         message = "Product marked as favorite"
         if self.unlike:
             message = "Product removed from favorite"
-        return Response({"status": True, "detail": message}, status=status.HTTP_200_OK)
+        return Response({"status": True, "message": message}, status=status.HTTP_200_OK)
 
 
 class ReviewViewSet(GenericViewSet):
@@ -182,6 +182,7 @@ class CartItemViewSet(ModelViewSet):
 
 class OrderViewSet(ModelViewSet):
     http_method_names = ["get", "post", "head", "options"]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = shop_serializer.CreateOrderSerializer(
