@@ -13,17 +13,20 @@ from shop.validators import validate_file_size
 
 
 class Color(models.Model):
-    name = models.CharField(max_length=200, null=True, blank=True)
+    name = models.CharField(max_length=200, null=True, blank=True, unique=True)
     hex_code = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self) -> str:
         if not self.name:
             return "unnamed"
         return self.name
+    
+    class Meta:
+        unique_together = ["name", "hex_code"]
 
 
 class Size(models.Model):
-    size = models.CharField(max_length=20)
+    size = models.CharField(max_length=20, unique=True)
 
     def __str__(self) -> str:
         return self.size

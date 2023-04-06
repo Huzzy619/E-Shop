@@ -13,7 +13,7 @@ from rest_framework.mixins import (
     ListModelMixin,
     RetrieveModelMixin,
 )
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
@@ -21,25 +21,37 @@ from likes.models import Like
 from likes.views import LikeView
 from shop.pagination import DefaultPagination
 from shop.permissions import IsAdminOrReadOnly
+
 from . import serializers as shop_serializer
 from .filters import ProductFilter
-from .models import (BillingAddress, Cart, CartItem, Collection, Notification, Order, Product, ProductImage, Review,
-                     TrackOrder)
+from .models import (
+    BillingAddress,
+    Cart,
+    CartItem,
+    Collection,
+    Notification,
+    Order,
+    Product,
+    ProductImage,
+    Review,
+    TrackOrder,
+)
 
 
 class Notifications(GenericAPIView):
     """
     Feed, Offers, Activity Notification
     """
+
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         user = request.user
         notifications = Notification.objects.filter(users__in=[user]).values(
-                "type", "title", "desc", "created_at"
+            "type", "title", "desc", "created_at"
         )
         return Response(
-                {"message": "Notified", "data": notifications, "status": True}, status=200
+            {"message": "Notified", "data": notifications, "status": True}, status=200
         )
 
 
@@ -50,7 +62,13 @@ class CollectionViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
 
 class ProductViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
-    queryset = Product.objects.prefetch_related("images").all()
+    queryset = (
+        Product.objects.prefetch_related(
+            "images", "reviews", "size_inventory__size", "color_inventory__color",
+        )
+        .select_related("collection")
+        .all()
+    )
     serializer_class = shop_serializer.ProductSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
@@ -69,17 +87,17 @@ class ProductViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
         return {"request": self.request}
 
     @action(
-            detail=False,
-            methods=["GET"],
-            permission_classes=[IsAuthenticated],
+        detail=False,
+        methods=["GET"],
+        permission_classes=[IsAuthenticated],
     )
     def my_favorites(self, request):
         products = Like.objects.objects_liked_by_user(request.user, Product)
         serializer = self.serializer_class(products, many=True)
 
         return Response(
-                data={"results": serializer.data, "status": True},
-                status=status.HTTP_200_OK,
+            data={"results": serializer.data, "status": True},
+            status=status.HTTP_200_OK,
         )
 
 
@@ -103,9 +121,12 @@ class LikeProductView(LikeView):
         if self.unlike:
             message = "Product removed from favorite"
 
-        product_instance = Product.objects.get(id=request.data['product_id'])
+        product_instance = Product.objects.get(id=request.data["product_id"])
         data = shop_serializer.ProductSerializer(product_instance).data
-        return Response({"status": True, "message": message, "results": data}, status=status.HTTP_200_OK)
+        return Response(
+            {"status": True, "message": message, "results": data},
+            status=status.HTTP_200_OK,
+        )
 
 
 class ReviewViewSet(GenericViewSet):
@@ -140,13 +161,13 @@ class ReviewViewSet(GenericViewSet):
             total_reviews = 1
 
         return Response(
-                {"total_reviews": total_reviews, "rating": rating, "status": True},
-                status=status.HTTP_200_OK,
+            {"total_reviews": total_reviews, "rating": rating, "status": True},
+            status=status.HTTP_200_OK,
         )
 
 
 class CartViewSet(
-        CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, GenericViewSet
+    CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, GenericViewSet
 ):
     queryset = Cart.objects.prefetch_related("items__product").all()
     serializer_class = shop_serializer.CartSerializer
@@ -167,7 +188,7 @@ class CartItemViewSet(ModelViewSet):
 
     def get_queryset(self):
         return CartItem.objects.filter(cart_id=self.kwargs["cart_pk"]).select_related(
-                "product"
+            "product"
         )
 
 
@@ -177,7 +198,7 @@ class OrderViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = shop_serializer.CreateOrderSerializer(
-                data=request.data, context={"user_id": self.request.user.id}
+            data=request.data, context={"user_id": self.request.user.id}
         )
         serializer.is_valid(raise_exception=True)
         order = serializer.save()
@@ -221,8 +242,8 @@ class TrackOrderView(GenericAPIView):
             _status = serializer.validated_data["status"]
         except KeyError:
             return Response(
-                    {"message": "Invalid data", "status": False},
-                    status=status.HTTP_400_BAD_REQUEST,
+                {"message": "Invalid data", "status": False},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         track_obj = TrackOrder.objects.get(id=order.tracking.id)
@@ -233,7 +254,10 @@ class TrackOrderView(GenericAPIView):
             track_obj.date_delivered = datetime.now()
 
             notification = Notification.objects.create(
-                    type="ACTIVITY", title="Order Delivery", desc="Your order has been delivered")
+                type="ACTIVITY",
+                title="Order Delivery",
+                desc="Your order has been delivered",
+            )
             notification.users.add(order.customer)
 
         track_obj.status = _status
@@ -241,11 +265,11 @@ class TrackOrderView(GenericAPIView):
         track_obj.save()
 
         return Response(
-                {
-                    "data": shop_serializer.TrackOrderSerializer(track_obj).data,
-                    "status": True,
-                },
-                status=status.HTTP_200_OK,
+            {
+                "data": shop_serializer.TrackOrderSerializer(track_obj).data,
+                "status": True,
+            },
+            status=status.HTTP_200_OK,
         )
 
 
