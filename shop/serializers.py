@@ -149,8 +149,8 @@ class CartSerializer(serializers.ModelSerializer):
 
 class AddCartItemSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField()
-    size = serializers.CharField(required=False)
-    color = serializers.CharField(required=False)
+    size = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    color = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     quantity = serializers.IntegerField()
 
     def validate_product_id(self, value):
