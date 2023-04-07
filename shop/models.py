@@ -20,7 +20,7 @@ class Color(models.Model):
         if not self.name:
             return "unnamed"
         return self.name
-    
+
     class Meta:
         unique_together = ["name", "hex_code"]
 
@@ -115,6 +115,8 @@ class SizeInventory(models.Model):
         return self.product.title
 
     # def clean(self):
+    #     from django.core.exceptions import ValidationError
+
     #     total_quantity = self.product.size_inventory.aggregate(
     #             total_quantity=models.Sum('quantity'))['total_quantity'] or 0
     #     if total_quantity + self.quantity > self.product.inventory:
@@ -144,14 +146,15 @@ class ColorInventory(models.Model):
         return self.product.title
 
     # def clean(self):
-    # total_quantity = self.product.color_inventory.aggregate(
-    #         total_quantity=models.Sum('quantity'))['total_quantity'] or 0
-    # if total_quantity + self.quantity > self.product.inventory:
-    #     raise ValidationError(
-    #             "Total quantity of this product size inventory exceeds the amount in stock.")
-    # if self.quantity == 0:
-    #     raise ValidationError(
-    #             "This product size is no more in stock.")
+    #     from django.core.exceptions import ValidationError
+    #     total_quantity = self.product.color_inventory.aggregate(
+    #             total_quantity=models.Sum('quantity'))['total_quantity'] or 0
+    #     if total_quantity + self.quantity > self.product.inventory:
+    #         raise ValidationError(
+    #                 "Total quantity of this product size inventory exceeds the amount in stock.")
+    #     if self.quantity == 0:
+    #         raise ValidationError(
+    #                 "This product size is no more in stock.")
 
 
 class Order(models.Model):
@@ -237,8 +240,6 @@ class CartItem(models.Model):
     size = models.CharField(max_length=100, null=True, blank=True)
     color = models.CharField(max_length=100, null=True, blank=True)
 
-    # class Meta:
-    #     unique_together = [["cart", "product"]]
     @property
     def resolved_price(self):
         main_price = self.product.unit_price

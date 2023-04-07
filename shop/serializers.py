@@ -150,7 +150,7 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        fields = ["id", "product", "quantity", "total_price"]
+        fields = ["id", "product", "quantity", "size", "color", "total_price"]
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -187,10 +187,6 @@ class AddCartItemSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {"message": "Invalid size object", "status": False}
                 )
-            except Size.MultipleObjectsReturned:
-                size = Size.objects.filter(size=size)
-                size.delete()
-                size = Size.objects.create(size=size)
 
             if not SizeInventory.objects.filter(
                 size=size, product_id=attrs["product_id"]
@@ -228,15 +224,29 @@ class AddCartItemSerializer(serializers.ModelSerializer):
         size = validated_data.get("size", "")
         color = validated_data.get("color", "")
 
-        self.instance = CartItem.objects.create(
+        # Check if item already in cart to avoid duplicates
+        instance = CartItem.objects.filter(
             cart_id=cart_id,
             product_id=product_id,
-            quantity=quantity,
             size=size if size else None,
             color=color if color else None,
         )
 
-        return self.instance
+        if instance:
+            # update quantity to the currently passed value
+            instance.quantity += quantity
+            instance.save()
+
+        else:
+            instance = CartItem.objects.create(
+                cart_id=cart_id,
+                product_id=product_id,
+                quantity=quantity,
+                size=size if size else None,
+                color=color if color else None,
+            )
+
+        return instance
 
     class Meta:
         model = CartItem
@@ -284,9 +294,13 @@ class CreateOrderSerializer(serializers.Serializer):
 
     def validate_cart_id(self, cart_id):
         if not Cart.objects.filter(pk=cart_id).exists():
-            raise serializers.ValidationError("No cart with the given ID was found.")
+            raise serializers.ValidationError(
+                {"message": "No cart with the given ID was found.", "status": False}
+            )
         if CartItem.objects.filter(cart_id=cart_id).count() == 0:
-            raise serializers.ValidationError("The cart is empty.")
+            raise serializers.ValidationError(
+                {"message": "The cart is empty.", "status": False}
+            )
         return cart_id
 
     def save(self, **kwargs):

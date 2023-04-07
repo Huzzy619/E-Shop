@@ -6,7 +6,7 @@ from django.utils.html import format_html, urlencode
 
 from shop import models
 
-admin.site.register([models.Color, models.Size, models.Review, models.ColorInventory, models.SizeInventory])
+admin.site.register([models.Color, models.Size, models.Review])
 
 
 class InventoryFilter(admin.SimpleListFilter):
@@ -74,6 +74,10 @@ class ProductAdmin(admin.ModelAdmin):
                 f"{updated_count} products were successfully updated.",
                 messages.ERROR,
         )
+    from typing import Any
+    def save_formset(self, request: Any, form: Any, formset: Any, change: Any) -> None:
+        self.save_model()
+        return super().save_formset(request, form, formset, change)
 
     class Media:
         css = {"all": ["styles.css"]}
