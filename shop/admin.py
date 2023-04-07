@@ -74,6 +74,12 @@ class ProductAdmin(admin.ModelAdmin):
                 f"{updated_count} products were successfully updated.",
                 messages.ERROR,
         )
+    
+    # def save_model(self, request, obj, form, change):
+    #     if obj.is_digital and not obj.url:
+    #         # raise ValueError()
+    #         raise form.ValidationError("A valid URL is required for a digital product")
+    #     return super().save_model(request, obj, form, change)
 
     class Media:
         css = {"all": ["styles.css"]}

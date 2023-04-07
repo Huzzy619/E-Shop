@@ -144,13 +144,19 @@ class SimpleProductSerializer(serializers.ModelSerializer):
 class CartItemSerializer(serializers.ModelSerializer):
     product = SimpleProductSerializer()
     total_price = serializers.SerializerMethodField()
+    hex_code = serializers.SerializerMethodField()
 
     def get_total_price(self, cart_item: CartItem):
         return cart_item.quantity * cart_item.resolved_price
 
+    def get_hex_code(self, obj):
+        if obj.color:
+            color = Color.objects.get(name = obj.color)
+            return color.hex_code
+        return None
     class Meta:
         model = CartItem
-        fields = ["id", "product", "quantity", "size", "color", "total_price"]
+        fields = ["id", "product", "quantity", "size", "color","hex_code", "total_price"]
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -250,7 +256,7 @@ class AddCartItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        fields = ["id", "product_id", "quantity", "size", "color"]
+        fields = ["id", "product_id", "quantity", "size", "color", "hex_code"]
 
 
 class UpdateCartItemSerializer(serializers.ModelSerializer):
