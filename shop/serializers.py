@@ -230,7 +230,7 @@ class AddCartItemSerializer(serializers.ModelSerializer):
             product_id=product_id,
             size=size if size else None,
             color=color if color else None,
-        )
+        ).first()
 
         if instance:
             # update quantity to the currently passed value
