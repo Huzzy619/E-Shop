@@ -9,17 +9,16 @@ from shop.signals import order_created
 from .models import (
     BillingAddress,
     Cart,
-    CartItem,
+    CartItem,  # SizeInventory,
     Collection,
     Color,
-    ColorInventory,
+    ColorSizeInventory,
     Order,
     OrderItem,
     Product,
     ProductImage,
     Review,
     Size,
-    SizeInventory,
     TrackOrder,
 )
 
@@ -52,26 +51,18 @@ class SizeSerializer(serializers.ModelSerializer):
         fields = ["size"]
 
 
-class SizeInventorySerializer(serializers.ModelSerializer):
+class ColorSizeInventorySerializer(serializers.ModelSerializer):
     size = SizeSerializer()
-
-    class Meta:
-        model = SizeInventory
-        fields = ["quantity", "extra_price", "size"]
-
-
-class ColorInventorySerializer(serializers.ModelSerializer):
     color = ColorSerializer()
 
     class Meta:
-        model = ColorInventory
-        fields = ["quantity", "extra_price", "color"]
+        model = ColorSizeInventory
+        fields = ["id", "quantity", "extra_price", "size", "color"]
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    sizes = SizeInventorySerializer(source="size_inventory", many=True, read_only=True)
-    colors = ColorInventorySerializer(
-        source="color_inventory", many=True, read_only=True
+    properties = ColorSizeInventorySerializer(
+        source="color_size_inventory", many=True, read_only=True
     )
     images = ProductImageSerializer(many=True, read_only=True)
 
@@ -88,8 +79,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "rating",
             "total_review",
             "images",
-            "colors",
-            "sizes",
+            "properties",
         ]
 
 
@@ -144,19 +134,47 @@ class SimpleProductSerializer(serializers.ModelSerializer):
 class CartItemSerializer(serializers.ModelSerializer):
     product = SimpleProductSerializer()
     total_price = serializers.SerializerMethodField()
-    hex_code = serializers.SerializerMethodField()
+    inventory = serializers.SerializerMethodField()
 
     def get_total_price(self, cart_item: CartItem):
         return cart_item.quantity * cart_item.resolved_price
 
-    def get_hex_code(self, obj):
-        if obj.color:
-            color = Color.objects.get(name = obj.color)
-            return color.hex_code
+    def get_inventory(self, cart_item: CartItem):
+        queryset = ColorSizeInventory.objects.filter(
+            product_id=cart_item.product.id,
+        ).select_related("color", "size")
+        # queryset = cart_item.product.color_size_inventory
+
+        if cart_item.color and cart_item.size:
+            queryset = queryset.filter(
+                color__name=cart_item.color,
+                size__size=cart_item.size,
+            )
+        elif cart_item.color:
+            queryset = queryset.filter(color__name=cart_item.color)
+        elif cart_item.size:
+            queryset = queryset.filter(size__size=cart_item.size)
+        else:
+            return cart_item.product.inventory
+
+        obj = queryset.first()
+        if obj:
+            return obj.quantity
+
         return None
+
     class Meta:
         model = CartItem
-        fields = ["id", "product", "quantity", "size", "color","hex_code", "total_price"]
+        fields = [
+            "id",
+            "product",
+            "quantity",
+            "inventory",
+            "size",
+            "color",
+            "hex_code",
+            "total_price",
+        ]
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -185,43 +203,62 @@ class AddCartItemSerializer(serializers.ModelSerializer):
             )
         return value
 
+    
     def validate(self, attrs):
-        if size := attrs.get("size", ""):
-            try:
-                size = Size.objects.get(size=size)
-            except Size.DoesNotExist:
-                raise serializers.ValidationError(
-                    {"message": "Invalid size object", "status": False}
-                )
+        product_id = attrs["product_id"]
+        requested_quantity = attrs["quantity"]
+        inventory = 0
 
-            if not SizeInventory.objects.filter(
-                size=size, product_id=attrs["product_id"]
-            ):
-                raise serializers.ValidationError(
-                    {
-                        "message": "We don't have that size for this specific product!",
-                        "status": False,
-                    }
-                )
+        size = Size.objects.filter(size=attrs.get("size")).first()
+        if attrs.get("size") and not size:
+            raise serializers.ValidationError(
+                {"message": "Invalid size object", "status": False}
+            )
 
-        if color := attrs.get("color", ""):
-            try:
-                color = Color.objects.get(name=color)
-            except Color.DoesNotExist:
-                raise serializers.ValidationError(
-                    {"message": "Invalid color object", "status": False}
-                )
+        color = Color.objects.filter(name=attrs.get("color")).first()
+        if attrs.get("color") and not color:
+            raise serializers.ValidationError(
+                {"message": "Invalid color object", "status": False}
+            )
 
-            if not ColorInventory.objects.filter(
-                color=color, product_id=attrs["product_id"]
-            ):
-                raise serializers.ValidationError(
-                    {
-                        "message": "We don't have that color for this specific product!",
-                        "status": False,
-                    }
-                )
+        if not ColorSizeInventory.objects.filter(
+            color=color, product_id=product_id, size=size
+        ):
+            raise serializers.ValidationError(
+                {
+                    "message": "We don't have that color and size for this specific product!",
+                    "status": False,
+                }
+            )
+
+        queryset = ColorSizeInventory.objects.filter(
+            product_id=product_id,
+        ).select_related("color", "size")
+
+        if color and size:
+            queryset = queryset.filter(
+                color__name=color.name,
+                size__size=size.size,
+            )
+        elif color:
+            queryset = queryset.filter(color__name=color.name)
+        elif size:
+            queryset = queryset.filter(size__size=size.size)
+        else:
+            product = Product.objects.get(pk=product_id)
+            inventory = product.inventory
+
+        obj = queryset.first()
+        if obj:
+            inventory = obj.quantity
+
+        if requested_quantity > inventory:
+            raise serializers.ValidationError(
+                {"message": "Not enough of this product to add to cart", "status": False}
+            )
+
         return super().validate(attrs)
+    
 
     def create(self, validated_data):
         cart_id = self.context["cart_id"]
@@ -230,29 +267,30 @@ class AddCartItemSerializer(serializers.ModelSerializer):
         size = validated_data.get("size", "")
         color = validated_data.get("color", "")
 
-        # Check if item already in cart to avoid duplicates
-        instance = CartItem.objects.filter(
+        
+        color_name = None
+        
+        if color:
+            color_name = Color.objects.filter(name=color).first()
+
+        instance, created = CartItem.objects.get_or_create(
             cart_id=cart_id,
             product_id=product_id,
             size=size if size else None,
-            color=color if color else None,
-        ).first()
+            color=color_name if color else None,
+            defaults={
+                "quantity": quantity,
+                "hex_code": color_name.hex_code if color else None
+            },
+        )
 
-        if instance:
-            # update quantity to the currently passed value
-            instance.quantity += quantity
+        if not created:
+            # item already exists in cart, update quantity
+            instance.quantity = quantity
             instance.save()
 
-        else:
-            instance = CartItem.objects.create(
-                cart_id=cart_id,
-                product_id=product_id,
-                quantity=quantity,
-                size=size if size else None,
-                color=color if color else None,
-            )
-
         return instance
+
 
     class Meta:
         model = CartItem
@@ -343,6 +381,7 @@ class CreateOrderSerializer(serializers.Serializer):
                     quantity=item.quantity,
                     size=item.size,
                     color=item.color,
+                    hex_code = item.hex_code,
                 )
                 for item in cart_items
             ]

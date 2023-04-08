@@ -36,19 +36,19 @@ class ProductImageInline(admin.TabularInline):
 
 
 
-class SizeInventoryInline(admin.TabularInline):
-    model = models.SizeInventory
+class ColorSizeInventoryInline(admin.TabularInline):
+    model = models.ColorSizeInventory
     extra = 1
 
-class ColorInventoryInline(admin.TabularInline):
-    model = models.ColorInventory
-    extra = 1
+# class ColorInventoryInline(admin.TabularInline):
+#     model = models.ColorInventory
+#     extra = 1
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ["collection"]
     actions = ["clear_inventory"]
-    inlines = [ProductImageInline,ColorInventoryInline, SizeInventoryInline]
+    inlines = [ProductImageInline,ColorSizeInventoryInline]
     list_display = ["title", "unit_price", "inventory_status", "collection_title"]
     list_editable = ["unit_price"]
     list_filter = ["collection", "last_update", InventoryFilter]

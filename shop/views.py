@@ -64,7 +64,8 @@ class CollectionViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
 class ProductViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     queryset = (
         Product.objects.prefetch_related(
-            "images", "reviews", "size_inventory__size", "color_inventory__color",
+            "images", "reviews", 
+            "color_size_inventory__size", "color_size_inventory__color",
         )
         .select_related("collection")
         .all()
@@ -189,7 +190,10 @@ class CartItemViewSet(ModelViewSet):
     def get_queryset(self):
         return CartItem.objects.filter(cart_id=self.kwargs["cart_pk"]).select_related(
             "product"
-        )
+        ).prefetch_related(
+            "product__images"
+        )#.prefetch_related("product__color_size_inventory",
+         #"product__color_size_inventory__color", "product__color_size_inventory__size")
 
 
 class OrderViewSet(ModelViewSet):
