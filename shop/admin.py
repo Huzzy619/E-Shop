@@ -36,19 +36,29 @@ class ProductImageInline(admin.TabularInline):
 
 
 
-class ColorSizeInventoryInline(admin.TabularInline):
-    model = models.ColorSizeInventory
+class SizeInventoryInline(admin.TabularInline):
+    model = models.SizeInventory
     extra = 1
 
+<<<<<<< HEAD
 
 
+=======
+class ColorInventoryInline(admin.TabularInline):
+    model = models.ColorInventory
+    extra = 1
+>>>>>>> parent of e997cc8 (latest changes)
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ["collection"]
     actions = ["clear_inventory"]
+<<<<<<< HEAD
     form = forms.ProductForm
     inlines = [ProductImageInline,ColorSizeInventoryInline]
+=======
+    inlines = [ProductImageInline,ColorInventoryInline, SizeInventoryInline]
+>>>>>>> parent of e997cc8 (latest changes)
     list_display = ["title", "unit_price", "inventory_status", "collection_title"]
     list_editable = ["unit_price"]
     list_filter = ["collection", "last_update", InventoryFilter]

@@ -97,18 +97,13 @@ class ProductImage(models.Model):
     # colors = models.ManyToManyField(Color, blank=True)
     # sizes = models.ManyToManyField(Size, blank=True)
 
-class ColorSizeInventory(models.Model):
+
+class SizeInventory(models.Model):
     product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, related_name="color_size_inventory",
-        
-    )
-    color = models.ForeignKey(
-        Color, on_delete=models.CASCADE, related_name="product_color",
-        null=True, blank=True
+        Product, on_delete=models.CASCADE, related_name="size_inventory"
     )
     size = models.ForeignKey(
-        Size, on_delete=models.CASCADE, related_name="product_size", 
-        null=True, blank=True
+        Size, on_delete=models.CASCADE, related_name="product_size"
     )
     quantity = models.IntegerField(default=0, blank=True)
     extra_price = models.DecimalField(
@@ -116,37 +111,53 @@ class ColorSizeInventory(models.Model):
     )
 
     class Meta:
-        verbose_name = "Color & Size Inventory"
-        verbose_name_plural = "Product Color & Size Inventories"
-        unique_together = ["color","size"]
+        verbose_name_plural = "Product Size & Inventories"
 
     def __str__(self):
-        return self.product.title 
+        return self.product.title
+
+    # def clean(self):
+    #     from django.core.exceptions import ValidationError
+
+    #     total_quantity = self.product.size_inventory.aggregate(
+    #             total_quantity=models.Sum('quantity'))['total_quantity'] or 0
+    #     if total_quantity + self.quantity > self.product.inventory:
+    #         raise ValidationError(
+    #                 "Total quantity of this product size inventory exceeds the amount in stock.")
+    #     if self.quantity == 0:
+    #         raise ValidationError(
+    #                 "This product size is no more in stock.")
 
 
-class Cart(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4)
-    created_at = models.DateTimeField(auto_now_add=True)
+class ColorInventory(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="color_inventory"
+    )
+    color = models.ForeignKey(
+        Color, on_delete=models.CASCADE, related_name="product_color"
+    )
+    quantity = models.IntegerField(default=0, blank=True)
+    extra_price = models.DecimalField(
+        max_digits=6, decimal_places=2, blank=True, null=True
+    )
 
+    class Meta:
+        verbose_name_plural = "Product Color & Inventories"
 
-class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="cart_items")
-    quantity = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
-    size = models.CharField(max_length=100, null=True, blank=True)
-    color = models.CharField(max_length=100, null=True, blank=True)
-    hex_code = models.CharField(max_length=100, null=True, blank=True)
+    def __str__(self):
+        return self.product.title
 
-    @property
-    def resolved_price(self):
-        main_price = self.product.unit_price
+    # def clean(self):
+    #     from django.core.exceptions import ValidationError
+    #     total_quantity = self.product.color_inventory.aggregate(
+    #             total_quantity=models.Sum('quantity'))['total_quantity'] or 0
+    #     if total_quantity + self.quantity > self.product.inventory:
+    #         raise ValidationError(
+    #                 "Total quantity of this product size inventory exceeds the amount in stock.")
+    #     if self.quantity == 0:
+    #         raise ValidationError(
+    #                 "This product size is no more in stock.")
 
-        sub_total_price = self.product.color_size_inventory.filter(
-            ~Q(extra_price=None), color__name=self.color, size__size=self.size
-        ).aggregate(total=Sum("extra_price"))["total"] or 0
-
-        
-        return sum([main_price, sub_total_price])
 
 class Order(models.Model):
     PAYMENT_STATUS_PENDING = "pending"
@@ -195,7 +206,7 @@ class OrderItem(models.Model):
     unit_price = models.DecimalField(max_digits=6, decimal_places=2)
     size = models.CharField(max_length=100, null=True, blank=True)
     color = models.CharField(max_length=100, null=True, blank=True)
-    hex_code = models.CharField(max_length=100, null=True, blank=True)
+
 
 class TrackOrder(models.Model):
     ORDER_STATUS = [
@@ -218,6 +229,34 @@ class BillingAddress(models.Model):
     address = models.TextField()
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
+
+class Cart(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
+    size = models.CharField(max_length=100, null=True, blank=True)
+    color = models.CharField(max_length=100, null=True, blank=True)
+
+    @property
+    def resolved_price(self):
+        main_price = self.product.unit_price
+
+        colors_price = self.product.color_inventory.filter(
+            ~Q(extra_price=None), color__name=self.color
+        ).aggregate(c_total=Sum("extra_price"))["c_total"]
+
+        sizes_price = self.product.size_inventory.filter(
+            ~Q(extra_price=None), size__size=self.size
+        ).aggregate(s_total=Sum("extra_price"))["s_total"]
+
+        prices = [main_price, sizes_price, colors_price]
+
+        return sum([price for price in prices if price is not None])
 
 
 class Review(models.Model):
