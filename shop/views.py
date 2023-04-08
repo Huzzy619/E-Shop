@@ -283,3 +283,13 @@ class AddressViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         return serializer.save(customer=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        data = {
+            "message": "Billing addresses fetched successfully",
+            "data": serializer.data,
+            "status": True
+        }
+        return Response(data, status=status.HTTP_200_OK)

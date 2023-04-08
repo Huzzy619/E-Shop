@@ -1,4 +1,4 @@
-import dj_database_url
+# import dj_database_url
 
 from .settings import *
 
@@ -10,11 +10,22 @@ ALLOWED_HOSTS = ["139.162.145.4", "e-commerce.cleverapps.io", "eshop.cleverapps.
 
 CSRF_TRUSTED_ORIGINS = ["https://" + host for host in ALLOWED_HOSTS]
 
+# DATABASES = {
+#     "default": dj_database_url.parse(
+#             config("DB_URL", ""),
+#             conn_max_age=600,
+#     )
+# }
+
 DATABASES = {
-    "default": dj_database_url.parse(
-            config("DB_URL", ""),
-            conn_max_age=600,
-    )
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config('DB_NAME'),
+        "USER": config('DB_USER'),
+        "PASSWORD": config('DB_PASS'),
+        "HOST": config('DB_HOST'),
+        "PORT": config('DB_PORT'),
+    },
 }
 
 INSTALLED_APPS.remove("debug_toolbar")
