@@ -4,7 +4,7 @@ from django.db.models.query import QuerySet
 from django.urls import reverse
 from django.utils.html import format_html, urlencode
 
-from shop import models
+from shop import models, forms
 
 admin.site.register([models.Color, models.Size, models.Review])
 
@@ -40,14 +40,14 @@ class ColorSizeInventoryInline(admin.TabularInline):
     model = models.ColorSizeInventory
     extra = 1
 
-# class ColorInventoryInline(admin.TabularInline):
-#     model = models.ColorInventory
-#     extra = 1
+
+
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ["collection"]
     actions = ["clear_inventory"]
+    form = forms.ProductForm
     inlines = [ProductImageInline,ColorSizeInventoryInline]
     list_display = ["title", "unit_price", "inventory_status", "collection_title"]
     list_editable = ["unit_price"]
@@ -55,7 +55,6 @@ class ProductAdmin(admin.ModelAdmin):
     list_per_page = 10
     list_select_related = ["collection"]
     search_fields = ["title"]
-    save_on_top = True
 
     def collection_title(self, product):
         return product.collection.title
@@ -75,10 +74,13 @@ class ProductAdmin(admin.ModelAdmin):
                 messages.ERROR,
         )
     
-    # def save_model(self, request, obj, form, change):
+
+    # def save_model(self, request, obj, form:Form, change):
     #     if obj.is_digital and not obj.url:
-    #         # raise ValueError()
-    #         raise form.ValidationError("A valid URL is required for a digital product")
+    #         form.add_error('url', "A valid URL is required for a digital product")
+    #         messages.set_level(request, messages.ERROR)
+    #         messages.error(request, "Please fix the errors below.")
+    #         return HttpResponseRedirect(reverse('admin:%s_%s_change' % (obj._meta.app_label, obj._meta.model_name), args=(obj.id,)))
     #     return super().save_model(request, obj, form, change)
 
     class Media:

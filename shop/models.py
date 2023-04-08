@@ -83,6 +83,8 @@ class Product(models.Model):
             return 1
         return total
 
+    # d
+        
     class Meta:
         ordering = ["title"]
 
