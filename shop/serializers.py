@@ -186,7 +186,9 @@ class AddCartItemSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
-        if size := attrs.get("size", ""):
+        size = attrs.get("size", "")
+        color = attrs.get("color", "")
+        if size:
             try:
                 size = Size.objects.get(size=size)
             except Size.DoesNotExist:
@@ -204,7 +206,7 @@ class AddCartItemSerializer(serializers.ModelSerializer):
                     }
                 )
 
-        if color := attrs.get("color", ""):
+        if color:
             try:
                 color = Color.objects.get(name=color)
             except Color.DoesNotExist:
