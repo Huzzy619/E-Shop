@@ -64,7 +64,8 @@ class ProfileView(GenericAPIView):
         serializer.save()
 
         # * Update the database first and last name columns
-        if full_name := serializer.validated_data.get("full_name", ""):
+        full_name = serializer.validated_data.get("full_name", "")
+        if full_name:
             name_split = full_name.split(" ")
             if len(name_split) >= 2:
                 user.first_name = name_split[0].strip()
