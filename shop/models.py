@@ -186,7 +186,7 @@ class Order(models.Model):
 
     def id_generator(self, chars=string.digits + string.ascii_uppercase):
         length = self._meta.get_field("id").max_length
-        value = "".join(random.choice(chars) for _ in range(length))
+        value = "".join(random.choice(chars) for _ in range(length -1))
 
         return "#" + value
 

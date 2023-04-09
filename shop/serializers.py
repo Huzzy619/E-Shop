@@ -344,7 +344,7 @@ class CreateOrderSerializer(serializers.Serializer):
                     unit_price=item.resolved_price,
                     quantity=item.quantity,
                     size=item.size,
-                    color=item.color,
+                    color=item.color, 
                 )
                 for item in cart_items
             ]
