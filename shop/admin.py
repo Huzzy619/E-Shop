@@ -6,7 +6,7 @@ from django.utils.html import format_html, urlencode
 
 from shop import models, forms
 
-admin.site.register([models.Color, models.Size, models.Review])
+admin.site.register([models.Color, models.Size, models.Review, models.Cart])
 
 
 class InventoryFilter(admin.SimpleListFilter):
@@ -110,17 +110,17 @@ class CollectionAdmin(admin.ModelAdmin):
         return super().get_queryset(request).annotate(products_count=Count("products"))
 
 
-class OrderItemInline(admin.TabularInline):
-    autocomplete_fields = ["product"]
-    min_num = 1
-    max_num = 10
-    model = models.OrderItem
-    extra = 0
+# class OrderItemInline(admin.TabularInline):
+#     autocomplete_fields = ["product"]
+#     min_num = 1
+#     max_num = 10
+#     model = models.OrderItem
+#     extra = 0
 
 
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
-    inlines = [OrderItemInline]
+    # inlines = [OrderItemInline] 
     list_display = ["id", "placed_at", "customer"]
     search_fields = ["payment_status", "customer"]
 

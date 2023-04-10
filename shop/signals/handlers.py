@@ -7,4 +7,9 @@ from shop.signals import order_created
 def start_tracking(sender, **kwargs):
 
     # if kwargs['created']:
-    TrackOrder.objects.create(order = kwargs['instance'])
+    tracks = [
+        TrackOrder(
+        order = order
+    )
+    for order in kwargs['instances']]
+    TrackOrder.objects.bulk_create(tracks)

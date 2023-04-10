@@ -95,6 +95,7 @@ class PaymentCardSerializer(serializers.Serializer):
 
 
 class MakePaymentSerializer(serializers.Serializer):
-    order_id = serializers.CharField()
+
+    order_id = serializers.ListField(child = serializers.CharField(), min_length = 1)
     address_id = serializers.IntegerField()
     card_id = serializers.CharField()

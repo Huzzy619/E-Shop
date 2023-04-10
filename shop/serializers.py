@@ -5,7 +5,7 @@ from rest_framework import serializers
 from likes.models import Like
 from likes.serializers import LikeSerializer
 from shop.signals import order_created
-
+from utils.views import id_generator
 from .models import (
     BillingAddress,
     Cart,
@@ -14,7 +14,7 @@ from .models import (
     Color,
     ColorInventory,
     Order,
-    OrderItem,
+    # OrderItem,
     Product,
     ProductImage,
     Review,
@@ -165,7 +165,7 @@ class CartSerializer(serializers.ModelSerializer):
     cart_total_price = serializers.SerializerMethodField()
 
     def get_cart_total_price(self, cart):
-        return sum([item.quantity * item.resolved_price for item in cart.items.all()])
+        return sum([item.resolved_price for item in cart.items.all()])
 
     class Meta:
         model = Cart
@@ -300,20 +300,20 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = ["id"]
 
 
-class OrderItemSerializer(serializers.ModelSerializer):
-    product = SimpleProductSerializer()
+# class OrderItemSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = OrderItem
-        fields = ["id", "product", "unit_price", "quantity"]
+#     class Meta:
+#         model = OrderItem
+#         fields = ["id", "product", "unit_price", "quantity"]
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True)
+    # orderitem = OrderItemSerializer()
+    product = SimpleProductSerializer()
 
     class Meta:
         model = Order
-        fields = ["id", "customer", "placed_at", "payment_status", "items"]
+        fields = ["id", "customer", "placed_at", "payment_status", "product", "price", "quantity"]
 
 
 class UpdateOrderSerializer(serializers.ModelSerializer):
@@ -360,25 +360,31 @@ class CreateOrderSerializer(serializers.Serializer):
                     )
 
             customer = Customer.objects.get(id=self.context["user_id"])
-            order = Order.objects.create(customer=customer)
+
+            # order = Order(id  =  id_generator(Order),customer=customer)
 
             order_items = [
-                OrderItem(
-                    order=order,
+                Order(
+                    id  =  id_generator(Order),
+                    customer=customer,
                     product=item.product,
-                    unit_price=item.resolved_price,
+                    price=item.resolved_price,
                     quantity=item.quantity,
                     size=item.size,
-                    color=item.color, 
+                    color=item.color,
                 )
                 for item in cart_items
             ]
-            OrderItem.objects.bulk_create(order_items)
 
-            Cart.objects.filter(pk=cart_id).delete()
-            order_created.send_robust(self.__class__, instance=order)
+            self.instances = Order.objects.bulk_create(order_items)
+                
+                # return
+            cart = Cart.objects.get(pk=cart_id)
+            cart.delete()
 
-            return order
+            order_created.send_robust(self.__class__, instances = self.instances)
+        return self.instances
+        
 
 
 class TrackOrderSerializer(serializers.ModelSerializer):

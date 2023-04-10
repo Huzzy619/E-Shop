@@ -201,8 +201,8 @@ class OrderViewSet(ModelViewSet):
             data=request.data, context={"user_id": self.request.user.id}
         )
         serializer.is_valid(raise_exception=True)
-        order = serializer.save()
-        serializer = shop_serializer.OrderSerializer(order)
+        orders = serializer.save()
+        serializer = shop_serializer.OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
     def get_serializer_class(self):

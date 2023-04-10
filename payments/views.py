@@ -83,17 +83,17 @@ class MakePayment(APIView):
         card_id = data.get("card_id")
         address_id = data.get("address_id")
 
-        order = Order.objects.filter(customer=user, id=order_id).first()
-        if not order:
+        orders = Order.objects.filter(customer=user, id__in=order_id)
+        if not orders:
             return Response(
                 {"message": "You don't have any order with that ID", "status": False},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if order.payment_status == "complete":
-            return Response(
-                {"message": "Payment made already!", "status": False},
-                status=status.HTTP_200_OK,
-            )
+        # if order.payment_status == "complete":
+        #     return Response(
+        #         {"message": "Payment made already!", "status": False},
+        #         status=status.HTTP_200_OK,
+        #     )
 
         address = BillingAddress.objects.filter(customer=user, id=address_id).first()
         if not address:
@@ -115,11 +115,14 @@ class MakePayment(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        prices = []
+        for order in orders:
+            order.shipping_address = "address.address"
+            order.save()
+            prices.append(order.price)
 
-        order.shipping_address = address.address
-        order.save()
 
-        amount_payable = int(settings.SHIPPING_FEES) + order.get_total_price()
+        amount_payable = int(settings.SHIPPING_FEES) + sum(prices)
 
         try:
     
@@ -132,29 +135,30 @@ class MakePayment(APIView):
             )
 
             if payment["status"] == "succeeded":
-                order.payment_status = "complete"
-                order.save()
+                title = ""
+                for order in orders:
+
+                    order.payment_status = "complete"
+                    order.save()
 
                 # Reduce quantities from inventory
-                title = ""
-                for item in order.items.all():
-                    item.product.inventory -= item.quantity
+                    order.product.inventory -= order.quantity
 
-                    item.product.save()
+                    order.product.save()
 
-                    if item.color:
-                        c_obj = ColorInventory.objects.get(product = item.product, colour__name = item.color)
-                        c_obj.quantity -= item.quantity
+                    if order.color:
+                        c_obj = ColorInventory.objects.get(product = order.product, color__name = order.color)
+                        c_obj.quantity -= order.quantity
                         c_obj.save()
 
-                    if item.size:
-                        s_obj = SizeInventory.objects.get(product = item.product, size__size = item.size)
-                        s_obj.quantity -= item.quantity
+                    if order.size:
+                        s_obj = SizeInventory.objects.get(product = order.product, size__size = order.size)
+                        s_obj.quantity -= order.quantity
                         s_obj.save() 
 
 
                     #For notification title
-                    title += item.product.title
+                    title += order.product.title
                 
                 
                 notification = Notification.objects.create(
@@ -165,8 +169,8 @@ class MakePayment(APIView):
                     {
                         "message": "Payment successful",
                         "payment_data": {
-                            "tx_ref": order.id,
-                            "amount": order.get_total_price(),
+                            # "tx_ref": order.id,
+                            "amount": sum(prices),
                             "shipping_fees": int(settings.SHIPPING_FEES),
                         },
                         "status": True,

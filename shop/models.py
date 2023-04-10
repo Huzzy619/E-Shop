@@ -175,37 +175,30 @@ class Order(models.Model):
     )
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     shipping_address = models.CharField(blank=True, null=True, max_length=1000)
+    # item = models.OneToOneField('CartItem', on_delete=models.DO_NOTHING)
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name="orderitems"
+    )
+    quantity = models.PositiveSmallIntegerField()
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    size = models.CharField(max_length=100, null=True, blank=True)
+    color = models.CharField(max_length=100, null=True, blank=True)
 
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.id = self.id_generator()
-            while __class__.objects.filter(id=self.id):
-                self.id = self.id_generator()
 
-        return super().save(*args, **kwargs)
-
-    def id_generator(self, chars=string.digits + string.ascii_uppercase):
-        length = self._meta.get_field("id").max_length
-        value = "".join(random.choice(chars) for _ in range(length -1))
-
-        return "#" + value
-
-    def get_total_price(self):
-        return sum([item.quantity * item.unit_price for item in self.items.all()])
 
     class Meta:
         permissions = [("cancel_order", "Can cancel order")]
 
 
-class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name="items")
-    product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name="orderitems"
-    )
-    quantity = models.PositiveSmallIntegerField()
-    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
-    size = models.CharField(max_length=100, null=True, blank=True)
-    color = models.CharField(max_length=100, null=True, blank=True)
+# class OrderItem(Order):
+#     # order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name="items")
+#     product = models.ForeignKey(
+#         Product, on_delete=models.PROTECT, related_name="orderitems"
+#     )
+#     quantity = models.PositiveSmallIntegerField()
+#     unit_price = models.DecimalField(max_digits=6, decimal_places=2)
+#     size = models.CharField(max_length=100, null=True, blank=True)
+#     color = models.CharField(max_length=100, null=True, blank=True)
 
 
 class TrackOrder(models.Model):
@@ -256,7 +249,7 @@ class CartItem(models.Model):
 
         prices = [main_price, sizes_price, colors_price]
 
-        return sum([price for price in prices if price is not None])
+        return self.quantity * sum([price for price in prices if price is not None])
 
 
 class Review(models.Model):
