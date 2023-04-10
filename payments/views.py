@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from shop.models import BillingAddress, Order, Notification
+from shop.models import BillingAddress, Order, Notification, SizeInventory, ColorInventory
 
 from .models import PaymentMethod
 from .serializers import MakePaymentSerializer, PaymentCardSerializer
@@ -141,6 +141,19 @@ class MakePayment(APIView):
                     item.product.inventory -= item.quantity
 
                     item.product.save()
+
+                    if item.color:
+                        c_obj = ColorInventory.objects.get(product = item.product, colour__name = item.color)
+                        c_obj.quantity -= item.quantity
+                        c_obj.save()
+
+                    if item.size:
+                        s_obj = SizeInventory.objects.get(product = item.product, size__size = item.size)
+                        s_obj.quantity -= item.quantity
+                        s_obj.save() 
+
+
+                    #For notification title
                     title += item.product.title
                 
                 

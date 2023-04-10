@@ -199,12 +199,25 @@ class AddCartItemSerializer(serializers.ModelSerializer):
             if not SizeInventory.objects.filter(
                 size=size, product_id=attrs["product_id"]
             ):
+                
                 raise serializers.ValidationError(
                     {
                         "message": "We don't have that size for this specific product!",
                         "status": False,
                     }
                 )
+            query = SizeInventory.objects.get(
+                size=size, product_id=attrs["product_id"]
+
+            )
+            if query.quantity <= 0:
+                raise serializers.ValidationError(
+                    {
+                        "message": "This size for this product is no longer in stock!",
+                        "status": False,
+                    }
+                )
+
 
         if color:
             try:
@@ -220,6 +233,18 @@ class AddCartItemSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {
                         "message": "We don't have that color for this specific product!",
+                        "status": False,
+                    }
+                )
+            
+            query = ColorInventory.objects.get(
+                color=color, product_id=attrs["product_id"]
+
+            )
+            if query.quantity <= 0:
+                raise serializers.ValidationError(
+                    {
+                        "message": "This color for this product is no longer in stock!",
                         "status": False,
                     }
                 )
