@@ -313,7 +313,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ["id", "customer", "placed_at", "payment_status", "product", "price", "quantity"]
+        fields = ["id", "customer", "placed_at", "payment_status", 
+                  "product","size","color", "price", "quantity"]
 
 
 class UpdateOrderSerializer(serializers.ModelSerializer):

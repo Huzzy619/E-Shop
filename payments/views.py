@@ -4,8 +4,13 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from shop.models import BillingAddress, Order, Notification, SizeInventory, ColorInventory
+from shop.models import (
+    BillingAddress,
+    ColorInventory,
+    Notification,
+    Order,
+    SizeInventory,
+)
 
 from .models import PaymentMethod
 from .serializers import MakePaymentSerializer, PaymentCardSerializer
@@ -89,11 +94,6 @@ class MakePayment(APIView):
                 {"message": "You don't have any order with that ID", "status": False},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # if order.payment_status == "complete":
-        #     return Response(
-        #         {"message": "Payment made already!", "status": False},
-        #         status=status.HTTP_200_OK,
-        #     )
 
         address = BillingAddress.objects.filter(customer=user, id=address_id).first()
         if not address:
@@ -117,17 +117,23 @@ class MakePayment(APIView):
             )
         prices = []
         for order in orders:
-            order.shipping_address = "address.address"
+            if order.payment_status == "complete":
+                return Response(
+                    {
+                        "message": f"Payment made already for {order.id} !",
+                        "status": False,
+                    },
+                    status=status.HTTP_200_OK,
+                )
+            order.shipping_address = address.address
             order.save()
             prices.append(order.price)
-
 
         amount_payable = int(settings.SHIPPING_FEES) + sum(prices)
 
         try:
-    
             payment = stripe.PaymentIntent.create(
-                amount= int(amount_payable * 100),
+                amount=int(amount_payable * 100),
                 currency="usd",
                 customer=user.cus_id,
                 payment_method=card_id,
@@ -137,32 +143,32 @@ class MakePayment(APIView):
             if payment["status"] == "succeeded":
                 title = ""
                 for order in orders:
-
                     order.payment_status = "complete"
                     order.save()
 
-                # Reduce quantities from inventory
+                    # Reduce quantities from inventory
                     order.product.inventory -= order.quantity
 
                     order.product.save()
 
                     if order.color:
-                        c_obj = ColorInventory.objects.get(product = order.product, color__name = order.color)
+                        c_obj = ColorInventory.objects.get(
+                            product=order.product, color__name=order.color
+                        )
                         c_obj.quantity -= order.quantity
                         c_obj.save()
 
                     if order.size:
-                        s_obj = SizeInventory.objects.get(product = order.product, size__size = order.size)
+                        s_obj = SizeInventory.objects.get(
+                            product=order.product, size__size=order.size
+                        )
                         s_obj.quantity -= order.quantity
-                        s_obj.save() 
+                        s_obj.save()
 
-
-                    #For notification title
+                    # For notification title
                     title += order.product.title
-                
-                
-                notification = Notification.objects.create(
-                    type="ACTIVITY", title=title)
+
+                notification = Notification.objects.create(type="ACTIVITY", title=title)
                 notification.users.add(user)
 
                 return Response(
@@ -188,3 +194,5 @@ class MakePayment(APIView):
             return Response(
                 {"message": str(e), "status": False}, status=status.HTTP_400_BAD_REQUEST
             )
+
+        
