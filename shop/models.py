@@ -53,7 +53,7 @@ class Product(models.Model):
     date_posted = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(
-        Collection, on_delete=models.PROTECT, related_name="products"
+        Collection, on_delete=models.CASCADE, related_name="products"
     )
     likes = GenericRelation(Like)
     # colors = models.ManyToManyField(Color, blank=True)
@@ -162,11 +162,11 @@ class Order(models.Model):
     payment_status = models.CharField(
         max_length=10, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING
     )
-    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     shipping_address = models.CharField(blank=True, null=True, max_length=1000)
     # item = models.OneToOneField('CartItem', on_delete=models.DO_NOTHING)
     product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name="orderitems"
+        Product, on_delete=models.CASCADE, related_name="orderitems"
     )
     quantity = models.PositiveSmallIntegerField()
     price = models.DecimalField(max_digits=6, decimal_places=2)
@@ -182,9 +182,9 @@ class Order(models.Model):
 
 
 # class OrderItem(Order):
-#     # order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name="items")
+#     # order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
 #     product = models.ForeignKey(
-#         Product, on_delete=models.PROTECT, related_name="orderitems"
+#         Product, on_delete=models.CASCADE, related_name="orderitems"
 #     )
 #     quantity = models.PositiveSmallIntegerField()
 #     unit_price = models.DecimalField(max_digits=6, decimal_places=2)
