@@ -271,12 +271,18 @@ class AddCartItemSerializer(serializers.ModelSerializer):
             instance.save()
 
         else:
+            hex_code = None
+            if color:
+                color = Color.objects.get(name = color)
+                hex_code = color.hex_code
+
             instance = CartItem.objects.create(
                 cart_id=cart_id,
                 product_id=product_id,
                 quantity=quantity,
                 size=size if size else None,
                 color=color if color else None,
+                hex_code = hex_code
             )
 
         return instance
@@ -314,7 +320,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ["id", "customer", "placed_at", "payment_status", 
-                  "product","size","color", "price", "quantity"]
+                  "product","size","color","hex_code", "price", "quantity"]
 
 
 class UpdateOrderSerializer(serializers.ModelSerializer):
@@ -373,6 +379,7 @@ class CreateOrderSerializer(serializers.Serializer):
                     quantity=item.quantity,
                     size=item.size,
                     color=item.color,
+                    hex_code = item.hex_code
                 )
                 for item in cart_items
             ]

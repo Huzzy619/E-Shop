@@ -172,6 +172,8 @@ class Order(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     size = models.CharField(max_length=100, null=True, blank=True)
     color = models.CharField(max_length=100, null=True, blank=True)
+    hex_code = models.CharField(max_length=100, null=True, blank=True)
+
 
 
 
@@ -223,6 +225,7 @@ class CartItem(models.Model):
     quantity = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
     size = models.CharField(max_length=100, null=True, blank=True)
     color = models.CharField(max_length=100, null=True, blank=True)
+    hex_code = models.CharField(max_length=100, null=True, blank=True)
 
     @property
     def resolved_price(self):
