@@ -1,5 +1,3 @@
-import random
-import string
 from uuid import uuid4
 
 from django.conf import settings
@@ -82,9 +80,8 @@ class Product(models.Model):
         return total
 
     # d
-        
-    class M    # colors = models.ManyToManyField(Color, blank=True)
-    # sizes = models.ManyToManyField(Size, blank=True)eta:
+
+    class Meta:
         ordering = ["title"]
 
 
@@ -112,7 +109,6 @@ class SizeInventory(models.Model):
 
     def __str__(self):
         return self.product.title
-
 
 
 class ColorInventory(models.Model):
