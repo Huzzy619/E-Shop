@@ -4,7 +4,7 @@ SECRET_KEY = config("SECRET_KEY")
 
 DEBUG = config("DEBUG", False, cast=bool)
 
-ALLOWED_HOSTS = ["172.104.133.142", "e-commerce.cleverapps.io", "eshop.cleverapps.io"]
+ALLOWED_HOSTS = ["virtual-wisdom.cleverapps.io", "e-commerce.cleverapps.io", "eshop.cleverapps.io"]
 
 CSRF_TRUSTED_ORIGINS = ["https://" + host for host in ALLOWED_HOSTS]
 
