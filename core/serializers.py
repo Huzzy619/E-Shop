@@ -99,6 +99,8 @@ class GoogleSocialAuthSerializer(serializers.Serializer):
         except Exception as identifier:
             raise serializers.ValidationError({"message": str(identifier), "status": False})
 
+        print(user_data["aud"])
+        print(config("GOOGLE_CLIENT_ID"))
         if user_data["aud"] != config("GOOGLE_CLIENT_ID"):
             raise serializers.ValidationError(
                     {"message": "Invalid credentials", "status": False}

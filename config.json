@@ -1,0 +1,78 @@
+[
+  {
+    "name": "CC_PYTHON_VERSION",
+    "value": "3"
+  },
+  {
+    "name": "CC_PYTHON_MANAGE_TASKS",
+    "value": "migrate"
+  },
+  {
+    "name": "CC_PYTHON_BACKEND",
+    "value": "gunicorn"
+  },
+  {
+    "name": "CC_PYTHON_MODULE",
+    "value": "Storefront.wsgi"
+  },
+  {
+    "name": "DJANGO_SETTINGS_MODULE",
+    "value": "Storefront.prod"
+  },
+  {
+    "name": "GOOGLE_CLIENT_ID",
+    "value": "201703575691-r9cbjb8a0nk5n3miidcfagk3t3non9nv.apps.googleusercontent.com"
+  },
+  {
+    "name": "GOOGLE_SECRET",
+    "value": "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"
+  },
+  {
+    "name": "SECRET_KEY",
+    "value": "$9!we3$l7&*ai-cbikzm$4^#c9ko0fi5vpb@5jn!t^bt2yphd^"
+  },
+  {
+    "name": "CLOUD_NAME",
+    "value": "doc3jbqfc"
+  },
+  {
+    "name": "CLOUD_API_KEY",
+    "value": "728524956956634"
+  },
+  {
+    "name": "CLOUD_API_SECRET",
+    "value": "_S1LlGwXuLIqNOXqBEjtDGWz0m8"
+  },
+  {
+    "name": "CALLBACK_URL",
+    "value": "https://rentrite.up.railway.app/accounts/google/login/callback/"
+  },
+  {
+    "name": "DB_URL",
+    "value": "postgresql://postgres:7viXEAnYoR8lRTFk8LlV@containers-us-west-57.railway.app:5598/railway"
+  },
+  {
+    "name": "SITE_ID",
+    "value": "1"
+  },
+  {
+    "name": "EMAIL_HOST_USER",
+    "value": "blazingkrane@gmail.com"
+  },
+  {
+    "name": "EMAIL_HOST_PASSWORD",
+    "value": "xnrunctxebrjwohz"
+  },
+  {
+    "name": "SOCIAL_PASSWORD",
+    "value": "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"
+  },
+  {
+    "name": "STRIPE_PUBLISHABLE_KEY",
+    "value": "pk_test_51Ms6pxIKJh0q3kh85ybnQwDMFmgnKHUuaVcJISmnlbKTbmhS4OkfE41ZIRRkQrIm50rCRxtDpKzSiQFycnqzpMa200CzJeWeDX"
+  },
+  {
+    "name": "STRIPE_SECRET_KEY",
+    "value": "sk_test_51Ms6pxIKJh0q3kh8JobJn42pHQ03MLTtwdWGZGIibEnwdQjlb5TGUulTXKdKtlZHgUphiUq6PJTDZa5dnb4gH5FD00K4PIVE05"
+  }
+]

@@ -5,22 +5,25 @@ from django.utils import lorem_ipsum
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from rest_framework import response, status
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 
-def register_social_user(email, name = None):
+def register_social_user(email, name=None):
     user = get_user_model().objects.filter(email=email).first()
 
     if not user:
         username = lorem_ipsum.words(2, common=False)
         username = "".join(username.split(" "))
-        get_user_model().objects.create_user(
+        user = get_user_model().objects.create_user(
             username=username, email=email, password=config("SOCIAL_PASSWORD")
         )
 
     refresh = RefreshToken.for_user(user)
+
+    access = refresh.access_token
+
     return {
-        "tokens": {"access": refresh.access, "refresh": refresh},
+        "tokens": {"access": str(access), "refresh": str(refresh)},
         "user": {
             "id": user.id,
             "username": user.username,
@@ -51,6 +54,7 @@ class Google:
                 },
                 status=status.HTTP_401_UNAUTHORIZED,
             )
+
 
 class Facebook:
     """
