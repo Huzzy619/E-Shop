@@ -1,5 +1,3 @@
-import random
-import string
 from uuid import uuid4
 
 from django.conf import settings
@@ -56,8 +54,6 @@ class Product(models.Model):
         Collection, on_delete=models.CASCADE, related_name="products"
     )
     likes = GenericRelation(Like)
-    # colors = models.ManyToManyField(Color, blank=True)
-    # sizes = models.ManyToManyField(Size, blank=True)
     is_digital = models.BooleanField(default=False)
     url = models.URLField(max_length=500, null=True, blank=True)
 
@@ -84,7 +80,7 @@ class Product(models.Model):
         return total
 
     # d
-        
+
     class Meta:
         ordering = ["title"]
 
@@ -94,8 +90,6 @@ class ProductImage(models.Model):
         Product, on_delete=models.CASCADE, related_name="images"
     )
     image = models.ImageField(upload_to="store/images", validators=[validate_file_size])
-    # colors = models.ManyToManyField(Color, blank=True)
-    # sizes = models.ManyToManyField(Size, blank=True)
 
 
 class SizeInventory(models.Model):
@@ -117,7 +111,6 @@ class SizeInventory(models.Model):
         return self.product.title
 
 
-
 class ColorInventory(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="color_inventory"
@@ -136,17 +129,6 @@ class ColorInventory(models.Model):
     def __str__(self):
         return self.product.title
 
-    # def clean(self):
-    #     from django.core.exceptions import ValidationError
-    #     total_quantity = self.product.color_inventory.aggregate(
-    #             total_quantity=models.Sum('quantity'))['total_quantity'] or 0
-    #     if total_quantity + self.quantity > self.product.inventory:
-    #         raise ValidationError(
-    #                 "Total quantity of this product size inventory exceeds the amount in stock.")
-    #     if self.quantity == 0:
-    #         raise ValidationError(
-    #                 "This product size is no more in stock.")
-
 
 class Order(models.Model):
     PAYMENT_STATUS_PENDING = "pending"
@@ -164,7 +146,6 @@ class Order(models.Model):
     )
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     shipping_address = models.CharField(blank=True, null=True, max_length=1000)
-    # item = models.OneToOneField('CartItem', on_delete=models.DO_NOTHING)
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="orderitems"
     )
@@ -174,22 +155,8 @@ class Order(models.Model):
     color = models.CharField(max_length=100, null=True, blank=True)
     hex_code = models.CharField(max_length=100, null=True, blank=True)
 
-
-
-
     class Meta:
         permissions = [("cancel_order", "Can cancel order")]
-
-
-# class OrderItem(Order):
-#     # order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
-#     product = models.ForeignKey(
-#         Product, on_delete=models.CASCADE, related_name="orderitems"
-#     )
-#     quantity = models.PositiveSmallIntegerField()
-#     unit_price = models.DecimalField(max_digits=6, decimal_places=2)
-#     size = models.CharField(max_length=100, null=True, blank=True)
-#     color = models.CharField(max_length=100, null=True, blank=True)
 
 
 class TrackOrder(models.Model):
